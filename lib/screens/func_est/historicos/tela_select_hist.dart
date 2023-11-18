@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/tela_historico.dart';
+import 'package:flutter_application_1/screens/func_est/historicos/tela_historico.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_1/screens/func_est/historicos/tela_historico_hotel.dart';
 
 class TelaSelectHist extends StatefulWidget {
   final String typeService;
@@ -91,11 +92,18 @@ class _TelaSelectHistState extends State<TelaSelectHist> {
                             onTap: () {
                               Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TelaHistorico(
-                                        typeService: typeService,
-                                        nomeAgenda: nomeAgenda),
-                                  ));
+                                  widget.typeService != 'hotelPet'
+                                      ? MaterialPageRoute(
+                                          builder: (context) => TelaHistorico(
+                                              typeService: typeService,
+                                              nomeAgenda: nomeAgenda),
+                                        )
+                                      : MaterialPageRoute(
+                                          builder: (context) =>
+                                              TelaHistoricoHotel(
+                                                  typeService: typeService,
+                                                  nomeAgenda: nomeAgenda),
+                                        ));
                             },
                           ),
                         );

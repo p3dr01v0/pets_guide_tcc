@@ -33,7 +33,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final TextEditingController _buscacontrole = TextEditingController();
-  
+
   List<Map<String, dynamic>> _filteredProviders = [];
 
   String searchStatus = '';
@@ -69,7 +69,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const telaFavoritos()),
+        MaterialPageRoute(builder: (context) => TelaFavoritos()),
       );
       print("Favoritos");
     } else if (index == 3) {
@@ -99,94 +99,101 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
   List<Widget> resultadoBuscaNome = [];
 
   Future<void> buscaNome(String query) async {
-      print("Chamando buscaNome com query: $query");
-      List<Map<String, dynamic>> nomeList = [];
+    print("Chamando buscaNome com query: $query");
+    List<Map<String, dynamic>> nomeList = [];
 
-      // Chame seu próprio método para recuperar os dados de provedores
-      List<Map<String, dynamic>> providersData = await getProvidersData();
+    // Chame seu próprio método para recuperar os dados de provedores
+    List<Map<String, dynamic>> providersData = await getProvidersData();
 
-      for (var provider in providersData) {
-        if (provider['username'] != null &&
-            provider['username'].toString().toLowerCase().contains(query.toLowerCase())) {
-          nomeList.add(provider);
-        }
+    for (var provider in providersData) {
+      if (provider['username'] != null &&
+          provider['username']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
+        nomeList.add(provider);
       }
+    }
 
-      setState(() {
-        _filteredProviders = List.from(nomeList);
-        resultadoBuscaNome = _filteredProviders.map((provider) => cardNome(provider)).toList();
-        print("Lista de provedores filtrada: $_filteredProviders");
-        if (query.isEmpty) {
-          searchStatus = '';
-        } else if (nomeList.isEmpty) {
-          searchStatus = 'Nenhum resultado encontrado.';
+    setState(() {
+      _filteredProviders = List.from(nomeList);
+      resultadoBuscaNome =
+          _filteredProviders.map((provider) => cardNome(provider)).toList();
+      print("Lista de provedores filtrada: $_filteredProviders");
+      if (query.isEmpty) {
+        searchStatus = '';
+      } else if (nomeList.isEmpty) {
+        searchStatus = 'Nenhum resultado encontrado.';
+      } else {
+        searchStatus = 'Resultados encontrados: ${nomeList.length}';
+      }
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getProvidersData() async {
+    List<Map<String, dynamic>> providersData = [];
+
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('estabelecimentos').get();
+
+      print("Tamanho da consulta de estabelecimentos: ${querySnapshot.size}");
+
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        // Acessando a subcoleção 'info' e obtendo os dados necessários
+        QuerySnapshot infoQuerySnapshot =
+            await doc.reference.collection('info').get();
+
+        if (infoQuerySnapshot.size > 0) {
+          for (QueryDocumentSnapshot infoDoc in infoQuerySnapshot.docs) {
+            Map<String, dynamic> infoData =
+                infoDoc.data() as Map<String, dynamic>;
+
+            data['nomeEstabelecimento'] = infoData['nome'];
+            data['imageEstabelecimento'] = infoData['imageEstabelecimento'];
+
+            providersData.add(data);
+          }
         } else {
-          searchStatus = 'Resultados encontrados: ${nomeList.length}';
+          print(
+              "A subcoleção de informações está vazia para o documento ${doc.id}");
         }
       }
+    } catch (e) {
+      print('Erro ao recuperar os dados dos provedores: $e');
+    }
+
+    print("Tamanho dos dados de provedores: ${providersData.length}");
+
+    return providersData;
+  }
+
+  Widget cardNome(Map<String, dynamic> provider) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      elevation: 5,
+      child: ListTile(
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration:
+              CardStyle.circleDecoration(provider['imageEstabelecimento']),
+        ),
+        title: Text(provider['username'] ?? 'Nome do Provedor'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Email: ${provider['emailProv'] ?? 'Não disponível'}"),
+            Text("Contato: ${provider['Contato'] ?? 'Não disponível'}"),
+          ],
+        ),
+      ),
     );
   }
-
-Future<List<Map<String, dynamic>>> getProvidersData() async {
-  List<Map<String, dynamic>> providersData = [];
-
-try {
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('estabelecimentos').get();
-
-  print("Tamanho da consulta de estabelecimentos: ${querySnapshot.size}");
-
-  for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
-    // Acessando a subcoleção 'info' e obtendo os dados necessários
-    QuerySnapshot infoQuerySnapshot = await doc.reference.collection('info').get();
-
-    if (infoQuerySnapshot.size > 0) {
-      for (QueryDocumentSnapshot infoDoc in infoQuerySnapshot.docs) {
-        Map<String, dynamic> infoData = infoDoc.data() as Map<String, dynamic>;
-
-        data['nomeEstabelecimento'] = infoData['nome'];
-        data['imageEstabelecimento'] = infoData['imageEstabelecimento'];
-
-        providersData.add(data);
-      }
-    } else {
-      print("A subcoleção de informações está vazia para o documento ${doc.id}");
-    }
-  }
-} catch (e) {
-  print('Erro ao recuperar os dados dos provedores: $e');
-}
-
-print("Tamanho dos dados de provedores: ${providersData.length}");
-
-return providersData;
-}
-
-
-Widget cardNome(Map<String, dynamic> provider) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.0),
-    ),
-    elevation: 5,
-    child: ListTile(
-      leading: Container(
-        width: 50,
-        height: 50,
-        decoration: CardStyle.circleDecoration(provider['imageEstabelecimento']),
-      ),
-      title: Text(provider['username'] ?? 'Nome do Provedor'),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Email: ${provider['emailProv'] ?? 'Não disponível'}"),
-          Text("Contato: ${provider['Contato'] ?? 'Não disponível'}"),
-        ],
-      ),
-    ),
-  );
-}
 
   List<Widget> resultadoBanhoETosa = [];
   List<Widget> resultadoHotelPet = [];
@@ -197,17 +204,21 @@ Widget cardNome(Map<String, dynamic> provider) {
     List<Map<String, dynamic>> servicosData = [];
 
     try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('estabelecimentos').get();
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('estabelecimentos').get();
 
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        QuerySnapshot subQuerySnapshotBanhoETosa = await doc.reference.collection('banhoETosa').get();
+        QuerySnapshot subQuerySnapshotBanhoETosa =
+            await doc.reference.collection('banhoETosa').get();
         for (QueryDocumentSnapshot subDoc in subQuerySnapshotBanhoETosa.docs) {
           Map<String, dynamic>? data = subDoc.data() as Map<String, dynamic>?;
           if (data != null) {
             data['subcolecao'] = 'banhoETosa';
-            QuerySnapshot infoQuerySnapshot = await doc.reference.collection('info').get();
+            QuerySnapshot infoQuerySnapshot =
+                await doc.reference.collection('info').get();
             for (QueryDocumentSnapshot infoDoc in infoQuerySnapshot.docs) {
-              Map<String, dynamic> infoData = infoDoc.data() as Map<String, dynamic>;
+              Map<String, dynamic> infoData =
+                  infoDoc.data() as Map<String, dynamic>;
               data['nomeEstabelecimento'] = infoData['nome'];
               data['imageEstabelecimento'] = infoData['imageEstabelecimento'];
               servicosData.add(data);
@@ -215,14 +226,17 @@ Widget cardNome(Map<String, dynamic> provider) {
           }
         }
 
-        QuerySnapshot subQuerySnapshotHotelPet = await doc.reference.collection('hotelPet').get();
+        QuerySnapshot subQuerySnapshotHotelPet =
+            await doc.reference.collection('hotelPet').get();
         for (QueryDocumentSnapshot subDoc in subQuerySnapshotHotelPet.docs) {
           Map<String, dynamic>? data = subDoc.data() as Map<String, dynamic>?;
           if (data != null) {
             data['subcolecao'] = 'hotelPet';
-            QuerySnapshot infoQuerySnapshot = await doc.reference.collection('info').get();
+            QuerySnapshot infoQuerySnapshot =
+                await doc.reference.collection('info').get();
             for (QueryDocumentSnapshot infoDoc in infoQuerySnapshot.docs) {
-              Map<String, dynamic> infoData = infoDoc.data() as Map<String, dynamic>;
+              Map<String, dynamic> infoData =
+                  infoDoc.data() as Map<String, dynamic>;
               data['nomeEstabelecimento'] = infoData['nome'];
               data['imageEstabelecimento'] = infoData['imageEstabelecimento'];
               servicosData.add(data);
@@ -230,14 +244,17 @@ Widget cardNome(Map<String, dynamic> provider) {
           }
         }
 
-        QuerySnapshot subQuerySnapshotVeterinario = await doc.reference.collection('veterinario').get();
+        QuerySnapshot subQuerySnapshotVeterinario =
+            await doc.reference.collection('veterinario').get();
         for (QueryDocumentSnapshot subDoc in subQuerySnapshotVeterinario.docs) {
           Map<String, dynamic>? data = subDoc.data() as Map<String, dynamic>?;
           if (data != null) {
             data['subcolecao'] = 'veterinario';
-            QuerySnapshot infoQuerySnapshot = await doc.reference.collection('info').get();
+            QuerySnapshot infoQuerySnapshot =
+                await doc.reference.collection('info').get();
             for (QueryDocumentSnapshot infoDoc in infoQuerySnapshot.docs) {
-              Map<String, dynamic> infoData = infoDoc.data() as Map<String, dynamic>;
+              Map<String, dynamic> infoData =
+                  infoDoc.data() as Map<String, dynamic>;
               data['nomeEstabelecimento'] = infoData['nome'];
               data['imageEstabelecimento'] = infoData['imageEstabelecimento'];
               servicosData.add(data);
@@ -252,7 +269,6 @@ Widget cardNome(Map<String, dynamic> provider) {
     return servicosData;
   }
 
-
   Future<void> buscaServico(String query) async {
     print("Chamando buscaServico com query: $query");
     List<Map<String, dynamic>> servicosList = [];
@@ -261,7 +277,10 @@ Widget cardNome(Map<String, dynamic> provider) {
 
     for (var servico in servicosData) {
       if (servico['nomeServico'] != null &&
-          servico['nomeServico'].toString().toLowerCase().contains(query.toLowerCase())) {
+          servico['nomeServico']
+              .toString()
+              .toLowerCase()
+              .contains(query.toLowerCase())) {
         DocumentSnapshot infoSnapshot = await FirebaseFirestore.instance
             .collection('estabelecimentos')
             .doc(servico['doc_id'])
@@ -270,7 +289,8 @@ Widget cardNome(Map<String, dynamic> provider) {
             .get();
 
         if (infoSnapshot.exists) {
-          Map<String, dynamic> infoData = infoSnapshot.data() as Map<String, dynamic>;
+          Map<String, dynamic> infoData =
+              infoSnapshot.data() as Map<String, dynamic>;
           servico['nomeEstabelecimento'] = infoData['nome'];
           servico['imageEstabelecimento'] = infoData['imageEstabelecimento'];
         }
@@ -281,7 +301,8 @@ Widget cardNome(Map<String, dynamic> provider) {
 
     setState(() {
       _filteredServicos = List.from(servicosList);
-      resultadoBuscaNome = _filteredServicos.map((servico) => cardServico(servico)).toList();
+      resultadoBuscaNome =
+          _filteredServicos.map((servico) => cardServico(servico)).toList();
       resultadoBanhoETosa = _filteredServicos
           .where((servico) => servico['subcolecao'] == 'banhoETosa')
           .map((servico) => cardBanhoETosa(servico))
@@ -306,107 +327,114 @@ Widget cardNome(Map<String, dynamic> provider) {
   }
 
   Widget cardServico(Map<String, dynamic> servico) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.0),
-    ),
-    elevation: 5,
-    child: ListTile(
-      leading: Container(
-        width: 50,
-        height: 50,
-        decoration: CardStyle.circleDecoration(servico['imageEstabelecimento']),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
       ),
-      title: Text(servico['nomeServico'] ?? 'serviço'),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
-          Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
-          Text("estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
-        ],
+      elevation: 5,
+      child: ListTile(
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration:
+              CardStyle.circleDecoration(servico['imageEstabelecimento']),
+        ),
+        title: Text(servico['nomeServico'] ?? 'serviço'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
+            Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
+            Text(
+                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget cardBanhoETosa(Map<String, dynamic> servico) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.0),
-    ),
-    elevation: 5,
-    child: ListTile(
-      leading: Container(
-        width: 50,
-        height: 50,
-        decoration: CardStyle.circleDecoration(servico['imageEstabelecimento']),
+  Widget cardBanhoETosa(Map<String, dynamic> servico) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
       ),
-      title: Text(servico['nomeServico'] ?? 'serviço'),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
-          Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
-          Text("estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
-        ],
+      elevation: 5,
+      child: ListTile(
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration:
+              CardStyle.circleDecoration(servico['imageEstabelecimento']),
+        ),
+        title: Text(servico['nomeServico'] ?? 'serviço'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
+            Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
+            Text(
+                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget cardHotelPet(Map<String, dynamic> servico) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.0),
-    ),
-    elevation: 5,
-    child: ListTile(
-      leading: Container(
-        width: 50,
-        height: 50,
-        decoration: CardStyle.circleDecoration(servico['imageEstabelecimento']),
+  Widget cardHotelPet(Map<String, dynamic> servico) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
       ),
-      title: Text(servico['nomeServico'] ?? 'serviço'),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
-          Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
-          Text("estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
-        ],
+      elevation: 5,
+      child: ListTile(
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration:
+              CardStyle.circleDecoration(servico['imageEstabelecimento']),
+        ),
+        title: Text(servico['nomeServico'] ?? 'serviço'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
+            Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
+            Text(
+                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget cardVeterinario(Map<String, dynamic> servico) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.0),
-    ),
-    elevation: 5,
-    child: ListTile(
-      leading: Container(
-        width: 50,
-        height: 50,
-        decoration: CardStyle.circleDecoration(servico['imageEstabelecimento']),
+  Widget cardVeterinario(Map<String, dynamic> servico) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15.0),
       ),
-      title: Text(servico['nomeServico'] ?? 'serviço'),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
-          Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
-          Text("estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
-        ],
+      elevation: 5,
+      child: ListTile(
+        leading: Container(
+          width: 50,
+          height: 50,
+          decoration:
+              CardStyle.circleDecoration(servico['imageEstabelecimento']),
+        ),
+        title: Text(servico['nomeServico'] ?? 'serviço'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
+            Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
+            Text(
+                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
- @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 243, 236),
@@ -414,7 +442,7 @@ Widget cardVeterinario(Map<String, dynamic> servico) {
         backgroundColor: const Color(0xFF10428B),
         title: const Text('Pesquisa'),
       ),
-            drawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
@@ -464,14 +492,14 @@ Widget cardVeterinario(Map<String, dynamic> servico) {
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AutentiacacaoTela()),
+                  MaterialPageRoute(
+                      builder: (context) => const AutentiacacaoTela()),
                 );
               },
             ),
-            ],
+          ],
         ),
       ),
-
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -490,11 +518,10 @@ Widget cardVeterinario(Map<String, dynamic> servico) {
                   ),
                   IconButton(
                     onPressed: () {
-                      if (pesquisa == true){
-                      buscaNome(_buscacontrole.text);
-                      }
-                      else {
-                      buscaServico(_buscacontrole.text);
+                      if (pesquisa == true) {
+                        buscaNome(_buscacontrole.text);
+                      } else {
+                        buscaServico(_buscacontrole.text);
                       }
                     },
                     icon: const Icon(Icons.search),
@@ -503,15 +530,15 @@ Widget cardVeterinario(Map<String, dynamic> servico) {
               ),
             ),
             TextButton(
-              onPressed: (){
+              onPressed: () {
                 setState(() {
                   pesquisa = !pesquisa;
                 });
               },
-                child: Text((pesquisa)? 
-                "pesquisar serviço" :
-                "pesquisar estabelecimento"),
-              ),
+              child: Text((pesquisa)
+                  ? "pesquisar serviço"
+                  : "pesquisar estabelecimento"),
+            ),
             ListView(
               shrinkWrap: true,
               children: resultadoBuscaNome,
@@ -519,7 +546,6 @@ Widget cardVeterinario(Map<String, dynamic> servico) {
           ],
         ),
       ),
-
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         height: _isVisible ? 60.0 : 0.0,
@@ -534,31 +560,33 @@ Widget cardVeterinario(Map<String, dynamic> servico) {
           ],
         ),
         child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color.fromARGB(255, 255, 251, 248),
-            currentIndex: _currentIndex,
-            unselectedItemColor: const Color.fromARGB(255, 3, 22, 50), // Cor dos itens não selecionados
-            selectedItemColor: const Color(0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
-            onTap: navegar,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Pesquisa',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: 'Favoritos',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Perfil',
-              ),
-            ],
-          ),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color.fromARGB(255, 255, 251, 248),
+          currentIndex: _currentIndex,
+          unselectedItemColor: const Color.fromARGB(
+              255, 3, 22, 50), // Cor dos itens não selecionados
+          selectedItemColor: const Color(
+              0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
+          onTap: navegar,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Pesquisa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favoritos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
     );
   }

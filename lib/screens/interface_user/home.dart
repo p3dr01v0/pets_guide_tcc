@@ -33,7 +33,6 @@ class _homeUserState extends State<homeUser> {
 
   List<Map<String, dynamic>> _providers = [];
 
-
   @override
   void initState() {
     super.initState();
@@ -62,7 +61,7 @@ class _homeUserState extends State<homeUser> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const telaFavoritos()),
+        MaterialPageRoute(builder: (context) => TelaFavoritos()),
       );
       print("Favoritos");
     } else if (index == 3) {
@@ -76,7 +75,6 @@ class _homeUserState extends State<homeUser> {
 
   void loadUserData() async {
     String? userUid = _auth.currentUser?.uid;
-    
 
     if (userUid != null && mounted) {
       DocumentSnapshot userData =
@@ -103,45 +101,51 @@ class _homeUserState extends State<homeUser> {
     }
   }
 
-Future<void> _fetchProviders(String uid) async {
-  final estabelecimentoCollection = _firestore.collection('estabelecimentos')
-      .where('servico', isEqualTo: true);
+  Future<void> _fetchProviders(String uid) async {
+    final estabelecimentoCollection = _firestore
+        .collection('estabelecimentos')
+        .where('servico', isEqualTo: true);
 
-  estabelecimentoCollection.get().then((QuerySnapshot querySnapshot) {
-    if (querySnapshot.docs.isNotEmpty) {
-      List<Map<String, dynamic>> tempProviders = [];
+    estabelecimentoCollection.get().then((QuerySnapshot querySnapshot) {
+      if (querySnapshot.docs.isNotEmpty) {
+        List<Map<String, dynamic>> tempProviders = [];
 
-      for (QueryDocumentSnapshot document in querySnapshot.docs) {
-        final informacoesReference = document.reference.collection('info');
-        informacoesReference.get().then((QuerySnapshot informacoesQuerySnapshot) {
-
-          if (informacoesQuerySnapshot.docs.isNotEmpty) {
-            // A subcoleção "info" existe neste documento de "estabelecimentos"
-            for (QueryDocumentSnapshot infoDoc in informacoesQuerySnapshot.docs) {
-              Map<String, dynamic> data = infoDoc.data() as Map<String, dynamic>;
-              data['dono'] = document['dono']; // Adicionando o campo 'dono' da coleção pai
-              data['UID'] = document.id; // Adicionando o campo 'UID' da coleção pai
-              tempProviders.add(data);
+        for (QueryDocumentSnapshot document in querySnapshot.docs) {
+          final informacoesReference = document.reference.collection('info');
+          informacoesReference
+              .get()
+              .then((QuerySnapshot informacoesQuerySnapshot) {
+            if (informacoesQuerySnapshot.docs.isNotEmpty) {
+              // A subcoleção "info" existe neste documento de "estabelecimentos"
+              for (QueryDocumentSnapshot infoDoc
+                  in informacoesQuerySnapshot.docs) {
+                Map<String, dynamic> data =
+                    infoDoc.data() as Map<String, dynamic>;
+                data['dono'] = document[
+                    'dono']; // Adicionando o campo 'dono' da coleção pai
+                data['UID'] =
+                    document.id; // Adicionando o campo 'UID' da coleção pai
+                tempProviders.add(data);
+              }
+            } else {
+              // A subcoleção "info" não existe neste documento de "estabelecimentos"
+              print('A subcoleção "info" não existe neste documento.');
             }
-          } else {
-            // A subcoleção "info" não existe neste documento de "estabelecimentos"
-            print('A subcoleção "info" não existe neste documento.');
-          }
 
-          setState(() {
-            _providers = List.from(tempProviders);
+            setState(() {
+              _providers = List.from(tempProviders);
+            });
+          }).catchError((error) {
+            print('Erro ao consultar a subcoleção "info": $error');
           });
-        }).catchError((error) {
-          print('Erro ao consultar a subcoleção "info": $error');
-        });
+        }
+      } else {
+        print('A coleção "estabelecimentos" está vazia ou não existe.');
       }
-    } else {
-      print('A coleção "estabelecimentos" está vazia ou não existe.');
-    }
-  }).catchError((error) {
-    print('Erro ao consultar a coleção "estabelecimentos": $error');
-  });
-}
+    }).catchError((error) {
+      print('Erro ao consultar a coleção "estabelecimentos": $error');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -201,11 +205,12 @@ Future<void> _fetchProviders(String uid) async {
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AutentiacacaoTela()),
+                  MaterialPageRoute(
+                      builder: (context) => const AutentiacacaoTela()),
                 );
               },
             ),
-            ],
+          ],
         ),
       ),
       body: Center(
@@ -225,8 +230,8 @@ Future<void> _fetchProviders(String uid) async {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    TelaEstabelecimento(estabelecimentoId: estabelecimentoId),
+                                builder: (context) => TelaEstabelecimento(
+                                    estabelecimentoId: estabelecimentoId),
                               ),
                             );
                           },
@@ -244,17 +249,21 @@ Future<void> _fetchProviders(String uid) async {
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Telefone: ${_providers[index]['contato']}'),
+                                  Text(
+                                      'Telefone: ${_providers[index]['contato']}'),
                                   Text('dono: ${_providers[index]['dono']}'),
                                 ],
                               ),
                               leading: SizedBox(
                                 width: 50.0,
                                 height: 50.0,
-                                child: _providers[index]['imageEstabelecimento'] != null
+                                child: _providers[index]
+                                            ['imageEstabelecimento'] !=
+                                        null
                                     ? ClipOval(
                                         child: Image.network(
-                                          _providers[index]['imageEstabelecimento'],
+                                          _providers[index]
+                                              ['imageEstabelecimento'],
                                           alignment: Alignment.center,
                                           width: 72.0,
                                           height: 72.0,
@@ -275,48 +284,48 @@ Future<void> _fetchProviders(String uid) async {
               )
             : const Text('Nenhum usuário autenticado'),
       ),
-        
-        bottomNavigationBar: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: _isVisible ? 60.0 : 0.0,
-          decoration: const BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey,
-                spreadRadius: 5,
-                blurRadius: 7,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color.fromARGB(255, 255, 251, 248),
-            currentIndex: _currentIndex,
-            unselectedItemColor: const Color.fromARGB(255, 3, 22, 50), // Cor dos itens não selecionados
-            selectedItemColor: const Color(0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
-            onTap: navegar,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Pesquisa',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: 'Favoritos',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Perfil',
-              ),
-            ],
-          ),
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: _isVisible ? 60.0 : 0.0,
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey,
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color.fromARGB(255, 255, 251, 248),
+          currentIndex: _currentIndex,
+          unselectedItemColor: const Color.fromARGB(
+              255, 3, 22, 50), // Cor dos itens não selecionados
+          selectedItemColor: const Color(
+              0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
+          onTap: navegar,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Pesquisa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favoritos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

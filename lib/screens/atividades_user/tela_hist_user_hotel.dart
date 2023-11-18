@@ -1,26 +1,23 @@
-// ignore_for_file: unused_local_variable
+// ignore_for_file: unused_local_variable, unnecessary_brace_in_string_interps
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_hist_user_hotel.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:logger/logger.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
 var logger = Logger();
 
-class TelaHistoricoUser extends StatefulWidget {
+class TelaHistoricoUserHotel extends StatefulWidget {
   @override
-  _TelaHistoricoUserState createState() => _TelaHistoricoUserState();
+  _TelaHistoricoUserHotelState createState() => _TelaHistoricoUserHotelState();
 }
 
-class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
+class _TelaHistoricoUserHotelState extends State<TelaHistoricoUserHotel> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
-  bool banhoTosa = false;
-  bool veterinario = false;
-  bool hotelPet = false;
   String uid = '';
 
   Map<String, Map<String, String>> petData = {};
@@ -48,7 +45,7 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
     if (_user != null) {
       uid = _user!.uid;
       return _firestore
-          .collection('user/$uid/agendamentos')
+          .collection('user/$uid/agendamentosHotelPet')
           .where("UID", isEqualTo: uid)
           .orderBy("dataAgendamento", descending: true)
           .snapshots();
@@ -98,10 +95,10 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                         Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TelaHistoricoUserHotel(),
+                              builder: (context) => TelaHistoricoUser(),
                             ));
                       },
-                      child: const Text('Agendamentos De Hotel Pet')),
+                      child: const Text('Agendamentos Comuns')),
                   const SizedBox(height: 30),
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
@@ -129,9 +126,17 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
 
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
+
                               final statusNumber = documents[index]['status'];
                               final petId = documents[index]['petId'];
                               final userId = documents[index]['UID'];
@@ -172,9 +177,11 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 6),
-                                      Text(data),
+                                      Text(
+                                          'Check-In: ${dataEntrada} às ${horarioEntrada}'),
                                       const SizedBox(height: 2),
-                                      Text(horario),
+                                      Text(
+                                          'Check-Out: ${dataSaida} às ${horarioSaida}'),
                                       const SizedBox(height: 14),
                                       const SizedBox(height: 16),
                                       Text(showStatus)

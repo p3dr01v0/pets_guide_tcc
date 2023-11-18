@@ -37,16 +37,21 @@ class _TelaHotelPetState extends State<TelaHotelPet> {
   }
 
   Future<void> _fetchProviders(String uid) async {
-    final estabelecimentoReference = _firestore.collection('estabelecimentos').doc(uid);
+    final estabelecimentoReference =
+        _firestore.collection('estabelecimentos').doc(uid);
 
-    estabelecimentoReference.get().then((DocumentSnapshot estabelecimentoSnapshot) {
+    estabelecimentoReference
+        .get()
+        .then((DocumentSnapshot estabelecimentoSnapshot) {
       if (estabelecimentoSnapshot.exists) {
-        final estabelecimentoData = estabelecimentoSnapshot.data() as Map<String, dynamic>?;
+        final estabelecimentoData =
+            estabelecimentoSnapshot.data() as Map<String, dynamic>?;
 
-        if (estabelecimentoData != null && estabelecimentoData['servico'] == true) {
+        if (estabelecimentoData != null &&
+            estabelecimentoData['servico'] == true) {
           final hotelPetReference = estabelecimentoReference
-          .collection('hotelPet')
-          .where('nomeServico', isNull: false);
+              .collection('hotelPet')
+              .where('nomeServico', isNull: false);
 
           hotelPetReference.get().then((QuerySnapshot hotelPetQuerySnapshot) {
             if (hotelPetQuerySnapshot.docs.isNotEmpty) {
@@ -76,68 +81,66 @@ class _TelaHotelPetState extends State<TelaHotelPet> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF10428B),
-        title: const Text('Serviços de Hospedagens'),
-      ),
-      body: Center(
-        child: _user != null
-            ? Column(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TelaAgenda(
-                                  typeService: typeService)));
-                    },
-                    child: const Text('Checar Agenda'),
-                  ),
-                  Text('ID do usuário autenticado: ${_user!.uid}'),
-                  const Text(' disponíveis:'),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _providers.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          elevation: 2.0,
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          child: ListTile(
-                            title: Text('${_providers[index]['nomeServico']}'),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                    'Duração ${_providers[index]['duracao']} Horas'),
-                                Text('Preço ${_providers[index]['preco']}'),
-                              ],
-                            ),
-                            trailing: const Icon(Icons.more_vert),
-                            isThreeLine: true,
-                          ),
-                        );
+        backgroundColor: const Color.fromARGB(255, 255, 243, 236),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF10428B),
+          title: const Text('Serviços de Hospedagens'),
+        ),
+        body: Center(
+          child: _user != null
+              ? Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    TelaAgenda(typeService: typeService)));
                       },
+                      child: const Text('Checar Agenda'),
                     ),
-                  ),
-                ],
-              )
-            : const Text('Nenhum usuário autenticado'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const telaAddServ())
-          );
-        },
-        backgroundColor: const Color(0xFF10428B),
-        child: const Icon(Icons.add),
-      )
-    );
+                    Text('ID do usuário autenticado: ${_user!.uid}'),
+                    const Text(' disponíveis:'),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _providers.length,
+                        itemBuilder: (context, index) {
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            elevation: 2.0,
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 16.0),
+                            child: ListTile(
+                              title:
+                                  Text('${_providers[index]['nomeServico']}'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                      'Duração ${_providers[index]['duracao']} Horas'),
+                                  Text('Diária  ${_providers[index]['preco']}'),
+                                ],
+                              ),
+                              trailing: const Icon(Icons.more_vert),
+                              isThreeLine: true,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              : const Text('Nenhum usuário autenticado'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const telaAddServ()));
+          },
+          backgroundColor: const Color(0xFF10428B),
+          child: const Icon(Icons.add),
+        ));
   }
 }

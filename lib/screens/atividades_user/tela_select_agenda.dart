@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/atividades_user/tela_agendamento.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_agendamento_pethotel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TelaSelectAgenda extends StatefulWidget {
@@ -63,9 +64,7 @@ class _TelaSelectAgendaState extends State<TelaSelectAgenda> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF10428B),
         title: const Text('Selecione a agenda'),
       ),
       body: Center(
@@ -97,12 +96,21 @@ class _TelaSelectAgendaState extends State<TelaSelectAgenda> {
                           onTap: () {
                             Navigator.push(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) => TelaAgendamento(
-                                          estabelecimentoId: estabelecimentoId,
-                                          typeService: typeService,
-                                          nomeAgenda: nomeAgenda,
-                                        )));
+                                typeService != 'hotelPet'
+                                    ? MaterialPageRoute(
+                                        builder: (context) => TelaAgendamento(
+                                              estabelecimentoId:
+                                                  estabelecimentoId,
+                                              typeService: typeService,
+                                              nomeAgenda: nomeAgenda,
+                                            ))
+                                    : MaterialPageRoute(
+                                        builder: ((context) =>
+                                            TelaAgendamentoPetHotel(
+                                                estabelecimentoId:
+                                                    estabelecimentoId,
+                                                typeService: typeService,
+                                                nomeAgenda: nomeAgenda))));
                           },
                           child: Card(
                             shape: RoundedRectangleBorder(

@@ -51,7 +51,7 @@ class _perfilUserState extends State<perfilUser> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) =>  const telaFavoritos()),
+        MaterialPageRoute(builder: (context) => TelaFavoritos()),
       );
       print("Favoritos");
     } else if (index == 3) {
@@ -134,7 +134,8 @@ class _perfilUserState extends State<perfilUser> {
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AutentiacacaoTela()),
+                  MaterialPageRoute(
+                      builder: (context) => const AutentiacacaoTela()),
                 );
               },
             ),
@@ -148,23 +149,30 @@ class _perfilUserState extends State<perfilUser> {
               elevation: 5.0,
               margin: const EdgeInsets.all(16.0),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0), // Ajuste o valor conforme necessário
+                borderRadius: BorderRadius.circular(
+                    12.0), // Ajuste o valor conforme necessário
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center, // Alinhe verticalmente ao centro
+                  crossAxisAlignment: CrossAxisAlignment
+                      .center, // Alinhe verticalmente ao centro
                   children: [
                     imgUser(), // Componente para exibir a imagem do usuário
-                    const SizedBox(width: 16.0), // Espaçamento entre a imagem e os textos
+                    const SizedBox(
+                        width: 16.0), // Espaçamento entre a imagem e os textos
                     Expanded(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center, // Alinhe verticalmente ao centro
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Alinhe verticalmente ao centro
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Nome: $nome', style: const TextStyle(fontSize: 16)),
-                          Text('Email: $email', style: const TextStyle(fontSize: 16)),
-                          Text('Telefone: $telefone', style: const TextStyle(fontSize: 16)),
+                          Text('Nome: $nome',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Email: $email',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Telefone: $telefone',
+                              style: const TextStyle(fontSize: 16)),
                         ],
                       ),
                     ),
@@ -179,7 +187,8 @@ class _perfilUserState extends State<perfilUser> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const InfoCachorros()),
+                      MaterialPageRoute(
+                          builder: (context) => const InfoCachorros()),
                     );
                   },
                   style: btnPet.imageButtonStyle,
@@ -192,7 +201,8 @@ class _perfilUserState extends State<perfilUser> {
                         Container(
                           width: 120,
                           height: 120,
-                          decoration: btnPet.imageBoxDecoration('imagens/cachorro.png'),
+                          decoration:
+                              btnPet.imageBoxDecoration('imagens/cachorro.png'),
                         ),
                         const SizedBox(height: 10),
                         const Text(
@@ -207,7 +217,8 @@ class _perfilUserState extends State<perfilUser> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const InfoGatos()),
+                      MaterialPageRoute(
+                          builder: (context) => const InfoGatos()),
                     );
                   },
                   style: btnPet.imageButtonStyle,
@@ -220,7 +231,8 @@ class _perfilUserState extends State<perfilUser> {
                         Container(
                           width: 120,
                           height: 120,
-                          decoration: btnPet.imageBoxDecoration('imagens/gato.png'),
+                          decoration:
+                              btnPet.imageBoxDecoration('imagens/gato.png'),
                         ),
                         const SizedBox(height: 10),
                         const Text(
@@ -238,48 +250,49 @@ class _perfilUserState extends State<perfilUser> {
       ),
 
       //barra de navegação inferior
-        bottomNavigationBar: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          height: _isVisible ? 60.0 : 0.0,
-          decoration: const BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey,
-                spreadRadius: 5,
-                blurRadius: 7,
-                offset: Offset(0, 3),
-              ),
-            ],
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color(0xFF10428B),
-            currentIndex: _currentIndex,
-            unselectedItemColor: const Color.fromARGB(255, 3, 22, 50), // Cor dos itens não selecionados
-            selectedItemColor: const Color.fromARGB(255, 255, 255, 255), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
-            onTap: navegar,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Pesquisa',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: 'Favoritos',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Perfil',
-              ),
-            ],
-          ),
-        //fim da barra de navegação inferior
-
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: _isVisible ? 60.0 : 0.0,
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey,
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color(0xFF10428B),
+          currentIndex: _currentIndex,
+          unselectedItemColor: const Color.fromARGB(
+              255, 3, 22, 50), // Cor dos itens não selecionados
+          selectedItemColor: const Color.fromARGB(255, 255, 255,
+              255), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
+          onTap: navegar,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Pesquisa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favoritos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Perfil',
+            ),
+          ],
+        ),
+        //fim da barra de navegação inferior
+      ),
     );
   }
 }

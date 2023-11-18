@@ -1,19 +1,17 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_finalizar_agendamento.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_finalizar_agendamento_hotel.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger();
 
-class TelaAgendamento extends StatefulWidget {
+class TelaAgendamentoPetHotel extends StatefulWidget {
   final String estabelecimentoId;
   final String typeService;
   final String nomeAgenda;
 
-  const TelaAgendamento(
+  const TelaAgendamentoPetHotel(
       {super.key,
       required this.estabelecimentoId,
       required this.typeService,
@@ -21,10 +19,11 @@ class TelaAgendamento extends StatefulWidget {
 
   @override
   // ignore: library_private_types_in_public_api
-  _TelaAgendamento createState() => _TelaAgendamento();
+  _TelaAgendamentoPetHotelState createState() =>
+      _TelaAgendamentoPetHotelState();
 }
 
-class _TelaAgendamento extends State<TelaAgendamento> {
+class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
 //instaciamentos do firebase (firestore e autentication)
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -34,7 +33,8 @@ class _TelaAgendamento extends State<TelaAgendamento> {
 
 //Inicialização de var que serão utilizadas
   bool banhoTosa = false;
-  String horario = '';
+  String horario1 = '';
+  String horario2 = '';
   String servico = '';
   List<dynamic> diasFuncionamento = [];
 
@@ -62,6 +62,7 @@ class _TelaAgendamento extends State<TelaAgendamento> {
 
   void getDiasFuncionamento() async {
     if (_user != null) {
+      // ignore: unused_local_variable
       final String uid = _user!.uid;
 
       final doc = await _firestore
@@ -80,17 +81,33 @@ class _TelaAgendamento extends State<TelaAgendamento> {
   }
 
 //variavel para receber data
-  DateTime _dateTime = DateTime.now();
-  String showDate =
+  DateTime _dateTime1 = DateTime.now().subtract(Duration(
+    hours: DateTime.now().hour,
+    minutes: DateTime.now().minute,
+    seconds: DateTime.now().second,
+    milliseconds: DateTime.now().millisecond,
+    microseconds: DateTime.now().microsecond,
+  ));
+
+  DateTime _dateTime2 = DateTime.now().subtract(Duration(
+    hours: DateTime.now().hour,
+    minutes: DateTime.now().minute,
+    seconds: DateTime.now().second,
+    milliseconds: DateTime.now().millisecond,
+    microseconds: DateTime.now().microsecond,
+  ));
+  String showDateEntrada =
+      '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
+  String showDateSaida =
       '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
 
 //método paga pegar data
-  void _showDatePicker() {
+  void _showDatePickerEntrada() {
     showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
+      lastDate: DateTime.now().add(const Duration(days: 60)),
       initialDatePickerMode: DatePickerMode.day,
       selectableDayPredicate: (day) {
         return diasFuncionamento[day.weekday - 1];
@@ -98,9 +115,32 @@ class _TelaAgendamento extends State<TelaAgendamento> {
     ).then((value) {
       if (value != null) {
         setState(() {
-          _dateTime = value; // foi removido o "!" de "value!"
-          showDate = '${_dateTime.day}/${_dateTime.month}/${_dateTime.year}';
-          horario = '';
+          _dateTime1 = value;
+          showDateEntrada =
+              '${_dateTime1.day}/${_dateTime1.month}/${_dateTime1.year}';
+          horario1 = '';
+        });
+      }
+    });
+  }
+
+  void _showDatePickerSaida() {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 60)),
+      initialDatePickerMode: DatePickerMode.day,
+      selectableDayPredicate: (day) {
+        return diasFuncionamento[day.weekday - 1];
+      },
+    ).then((value) {
+      if (value != null) {
+        setState(() {
+          _dateTime2 = value;
+          showDateSaida =
+              '${_dateTime2.day}/${_dateTime2.month}/${_dateTime2.year}';
+          horario2 = '';
         });
       }
     });
@@ -118,19 +158,38 @@ class _TelaAgendamento extends State<TelaAgendamento> {
       body: Center(
         child: Column(
           children: [
+            Text(widget.nomeAgenda),
+            Text(widget.typeService),
+            Text(widget.estabelecimentoId),
             const SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 OutlinedButton(
-                  onPressed: _showDatePicker,
-                  child: const Text('Escolher data'),
+                  style:
+                      OutlinedButton.styleFrom(fixedSize: const Size(190, 32)),
+                  onPressed: _showDatePickerEntrada,
+                  child: const Text('Escolher data de entrada'),
                 ),
-                Text(showDate, style: const TextStyle(fontSize: 16)),
+                Text(showDateEntrada, style: const TextStyle(fontSize: 16)),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                OutlinedButton(
+                  style:
+                      OutlinedButton.styleFrom(fixedSize: const Size(190, 32)),
+                  onPressed: _showDatePickerSaida,
+                  child: const Text('Escolher data de sáida'),
+                ),
+                Text(showDateSaida, style: const TextStyle(fontSize: 16)),
               ],
             ),
             StreamBuilder<List<String>>(
+              // LISTA DE HORARIOS 1
               stream:
                   fetchTimeFromFirestore(), // Stream dos horários disponíveis
               builder: (context, snapshot) {
@@ -142,22 +201,73 @@ class _TelaAgendamento extends State<TelaAgendamento> {
                   return const Text('Nenhum dado encontrado.');
                 } else {
                   List<String> data = snapshot.data!;
-                  horario == ''
-                      ? horario = data[0]
+                  horario1 == ''
+                      ? horario1 = data[0]
                       : teste = 'Erro desconhecido em time';
-                  return DropdownButton<String>(
-                    value: horario, // Valor selecionado
-                    items: data.map((item) {
-                      return DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        horario = newValue!;
-                      });
-                    },
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Horario de Check-In'),
+                      const SizedBox(
+                        width: 12,
+                      ),
+                      DropdownButton<String>(
+                        value: horario1, // Valor selecionado
+                        items: data.map((item) {
+                          return DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            horario1 = newValue!;
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+            StreamBuilder<List<String>>(
+              // LISTA DE HORARIOS 2
+              stream:
+                  fetchTimeFromFirestore(), // Stream dos horários disponíveis
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Erro: ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text('Nenhum dado encontrado.');
+                } else {
+                  List<String> data = snapshot.data!;
+                  horario2 == ''
+                      ? horario2 = data[0]
+                      : teste = 'Erro desconhecido em time';
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('Horário de check-Out'),
+                      const SizedBox(
+                        width: 12,
+                      ),
+                      DropdownButton<String>(
+                        value: horario2, // Valor selecionado
+                        items: data.map((item) {
+                          return DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            horario2 = newValue!;
+                          });
+                        },
+                      ),
+                    ],
                   );
                 }
               },
@@ -201,14 +311,17 @@ class _TelaAgendamento extends State<TelaAgendamento> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => TelaConcluirAgendamento(
+                          builder: (context) => TelaConcluirAgendamentoHotel(
                               estabelecimentoId: estabelecimentoId,
                               nomeAgenda: nomeAgenda,
                               typeService: typeService,
                               servico: servico,
-                              horario: horario,
-                              data: showDate,
-                              dataOfc: _dateTime,
+                              horarioEntrada: horario1,
+                              horarioSaida: horario2,
+                              dataEntrada: showDateEntrada,
+                              dataSaida: showDateSaida,
+                              dataOfcEntrada: _dateTime1,
+                              dataOfcSaida: _dateTime2,
                               preco: preco)));
                 },
                 child: const Text('Solicitar Agendamento')),
@@ -249,28 +362,6 @@ class _TelaAgendamento extends State<TelaAgendamento> {
           final doc = querySnapshot.docs.first;
           final List<dynamic> firestoreList = doc['horarios'] ?? [];
           List<String> timesList = firestoreList.cast<String>().toList();
-
-          final agendamentosCollection = firestore.collection(
-              'estabelecimentos/$estabelecimentoId/$typeService/$nomeAgenda/agendamentos');
-
-          // Consulta o Firestore para obter os agendamentos na data selecionada
-
-          final timeQuerySnapshot = await agendamentosCollection
-              .where('data', isEqualTo: showDate)
-              .where('isAccept',
-                  isEqualTo: true) // Considera apenas agendamentos aceitos
-              .get();
-
-          // Cria uma lista de horários que já foram agendados e aceitos
-          final horariosAgendados = timeQuerySnapshot.docs
-              .map((doc) => doc['horario'] as String)
-              .toList();
-
-          // Cria uma lista de horários que já foram agendados e aceitos
-
-          timesList = timesList
-              .where((horario) => !horariosAgendados.contains(horario))
-              .toList();
 
           return timesList;
         } else {

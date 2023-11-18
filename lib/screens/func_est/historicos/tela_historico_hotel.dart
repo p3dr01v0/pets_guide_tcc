@@ -1,20 +1,23 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_hist_user_hotel.dart';
 import 'package:logger/logger.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
 var logger = Logger();
 
-class TelaHistoricoUser extends StatefulWidget {
+class TelaHistoricoHotel extends StatefulWidget {
+  final String typeService;
+  final String nomeAgenda;
+
+  const TelaHistoricoHotel(
+      {super.key, required this.typeService, required this.nomeAgenda});
+
   @override
-  _TelaHistoricoUserState createState() => _TelaHistoricoUserState();
+  _TelaHistoricoHotelState createState() => _TelaHistoricoHotelState();
 }
 
-class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
+class _TelaHistoricoHotelState extends State<TelaHistoricoHotel> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
@@ -22,8 +25,10 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
   bool veterinario = false;
   bool hotelPet = false;
   String uid = '';
-
-  Map<String, Map<String, String>> petData = {};
+  String typeService = '';
+  String nomeAgenda = '';
+  late bool isAccept;
+  int i = 0;
 
   @override
   void initState() {
@@ -44,40 +49,18 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
     }
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>>? _getScheduleStream(String uid) {
-    if (_user != null) {
-      uid = _user!.uid;
-      return _firestore
-          .collection('user/$uid/agendamentos')
-          .where("UID", isEqualTo: uid)
-          .orderBy("dataAgendamento", descending: true)
-          .snapshots();
-    } else {
-      return null;
-    }
+  Stream<QuerySnapshot> _getScheduleStream(String uid) {
+    typeService = widget.typeService;
+    nomeAgenda = widget.nomeAgenda;
+
+    uid = _user!.uid;
+    return _firestore
+        .collection(
+            'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+        .where("isAccept", isEqualTo: true)
+        .where("status", isEqualTo: 4)
+        .snapshots();
   }
-
-  /*Future<void> _fetchData(String petId, String userId) async {
-    final petDoc =
-        await _firestore.collection('users/$userId/pets').doc(petId).get();
-    String nomePet = petDoc['nome'] as String;
-    String racaPet = petDoc['raca'] as String;
-    String imagePet = petDoc['imagePet'] as String;
-
-    final userDoc = await _firestore.collection('users').doc(userId).get();
-    String nomeUser = userDoc['nome'] as String;
-
-    final info = {
-      'nomeUser': userDoc['nome'] as String,
-      'nomePet': petDoc['nome'] as String,
-      'racaPet': petDoc['raca'] as String,
-      'imagePet': petDoc['imagePet'] as String
-    };
-
-    setState(() {
-      petData[petId] = info;
-    });
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -85,24 +68,14 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
       backgroundColor:
           const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        title: const Text('Historico:'),
+        title: Text('Historico: ${widget.nomeAgenda}'),
         backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
         child: _user != null
             ? Column(
                 children: [
-                  const SizedBox(height: 30),
-                  OutlinedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TelaHistoricoUserHotel(),
-                            ));
-                      },
-                      child: const Text('Agendamentos De Hotel Pet')),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 35),
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
                         stream: _getScheduleStream(uid),
@@ -121,24 +94,28 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                           }
 
                           final documents = snapshot.data!.docs;
-
                           return ListView.builder(
                             itemCount: documents.length,
                             itemBuilder: (context, index) {
-                              // Chame a função fetchData para buscar os dados do pet
-
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
+                              final nomePet =
+                                  documents[index]['petName'].toString();
+                              final nomeUser =
+                                  documents[index]['userName'].toString();
+                              final petImage =
+                                  documents[index]['petImage'].toString();
                               final statusNumber = documents[index]['status'];
-                              final petId = documents[index]['petId'];
-                              final userId = documents[index]['UID'];
                               String showStatus = '';
                               switch (statusNumber) {
-                                case 0:
-                                  showStatus = 'Aguardando Resposta';
                                 case 1:
                                   showStatus = 'Aguardando Check-In';
                                   break;
@@ -153,9 +130,9 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                                   showStatus = 'Finalizado';
                                   break;
                                 default:
-                                  showStatus =
-                                      'Não foi possível identificar o estado de agendamento';
+                                  showStatus = '';
                               }
+                              // ignore: unused_local_variable
                               final idAgendamento = documents[index]
                                   .id; // Use .id para obter o ID do documento
 
@@ -172,12 +149,45 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 6),
-                                      Text(data),
-                                      const SizedBox(height: 2),
-                                      Text(horario),
-                                      const SizedBox(height: 14),
+                                      Text('$nomePet de $nomeUser'),
+                                      const SizedBox(
+                                        height: 14,
+                                      ),
+                                      Text(
+                                          "Check-In: $dataEntrada às $horarioEntrada"),
+                                      const SizedBox(
+                                        height: 4,
+                                      ),
+                                      Text(
+                                          "Check-Out: $dataSaida às $horarioSaida"),
                                       const SizedBox(height: 16),
                                       Text(showStatus)
+                                    ],
+                                  ),
+                                  leading: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // ignore: unnecessary_null_comparison
+                                      petImage == "" || petImage == null
+                                          ? Container(
+                                              height: 48,
+                                              width: 48,
+                                              child: const Icon(Icons.pets))
+                                          : Container(
+                                              height: 48,
+                                              width: 48,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape
+                                                    .circle, // ou qualquer outra forma desejada
+                                                image: DecorationImage(
+                                                  image: NetworkImage(petImage),
+                                                  // Imagem padrão ou nenhuma imagem
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                            ),
                                     ],
                                   ),
                                 ),

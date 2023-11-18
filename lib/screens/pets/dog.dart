@@ -33,7 +33,7 @@ class _InfoCachorrosState extends State<InfoCachorros> {
     super.initState();
     pegarDados();
   }
-    
+
   void navegar(int index) {
     setState(() {
       _currentIndex = index;
@@ -54,7 +54,7 @@ class _InfoCachorrosState extends State<InfoCachorros> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const telaFavoritos()),
+        MaterialPageRoute(builder: (context) => TelaFavoritos()),
       );
       print("Favoritos");
     } else if (index == 3) {
@@ -66,39 +66,41 @@ class _InfoCachorrosState extends State<InfoCachorros> {
     }
   }
 
-void pegarDados() async {
-  String? userUid = _auth.currentUser?.uid;
+  void pegarDados() async {
+    String? userUid = _auth.currentUser?.uid;
 
-  if (userUid != null && mounted) {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('user')
-        .doc(userUid)
-        .collection('pets') // Alteração para 'pets' em vez de 'cachorros'
-        .get();
+    if (userUid != null && mounted) {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('user')
+          .doc(userUid)
+          .collection('pets') // Alteração para 'pets' em vez de 'cachorros'
+          .get();
 
-    setState(() {
-      cachorros = querySnapshot.docs
-          .where((doc) => doc['tipo'] == 'Cachorro') // Filtro por tipo 'cachorro'
-          .map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        return {
-          'id': doc.id,
-          'nome': data['nome'] ?? 'N/A',
-          'idade': data['idade'] ?? 'N/A',
-          'raca': data['raca'] ?? 'N/A',
-          'peso': data['peso'] ?? 'N/A',
-          'porte': data['porte'] ?? 'N/A',
-          'sexo': data['sexo'] ?? 'N/A',
-          'observacoes': data['observacoes'] ?? 'N/A',
-          'image': data['imagePet'] ?? '',
-          'tipo': data['tipo'] ?? 'N/A', // Adicionado campo 'tipo'
-        };
-      }).toList();
-    });
+      setState(() {
+        cachorros = querySnapshot.docs
+            .where((doc) =>
+                doc['tipo'] == 'Cachorro') // Filtro por tipo 'cachorro'
+            .map((doc) {
+          var data = doc.data() as Map<String, dynamic>;
+          return {
+            'id': doc.id,
+            'nome': data['nome'] ?? 'N/A',
+            'idade': data['idade'] ?? 'N/A',
+            'raca': data['raca'] ?? 'N/A',
+            'peso': data['peso'] ?? 'N/A',
+            'porte': data['porte'] ?? 'N/A',
+            'sexo': data['sexo'] ?? 'N/A',
+            'observacoes': data['observacoes'] ?? 'N/A',
+            'image': data['imagePet'] ?? '',
+            'tipo': data['tipo'] ?? 'N/A', // Adicionado campo 'tipo'
+          };
+        }).toList();
+      });
+    }
   }
-}
 
-  void editarPet(String petId, String nome, String raca, String idade, String peso, String observacoes) async {
+  void editarPet(String petId, String nome, String raca, String idade,
+      String peso, String observacoes) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -114,25 +116,24 @@ void pegarDados() async {
     );
   }
 
-void excluirDog(String petId) {
-  String? userUid = _auth.currentUser?.uid;
+  void excluirDog(String petId) {
+    String? userUid = _auth.currentUser?.uid;
 
-  if (userUid != null) {
-    _firestore
-        .collection('user')
-        .doc(userUid)
-        .collection('pets') // Subcoleção 'pets' em vez de 'cachorros'
-        .doc(petId)
-        .delete()
-        .then((value) {
+    if (userUid != null) {
+      _firestore
+          .collection('user')
+          .doc(userUid)
+          .collection('pets') // Subcoleção 'pets' em vez de 'cachorros'
+          .doc(petId)
+          .delete()
+          .then((value) {
         print('Pet excluído com sucesso.');
         pegarDados();
-        })
-        .catchError((error) {
-          print('Erro ao excluir pet: $error');
-        });
+      }).catchError((error) {
+        print('Erro ao excluir pet: $error');
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -161,11 +162,17 @@ void excluirDog(String petId) {
                       height: 100,
                       child: ClipOval(
                         child: cachorro['image'] != ''
-                          ? Image.network(cachorro['image'], fit: BoxFit.cover) // Use a imagem do URL se estiver disponível
-                          : Image.asset('imagens/cachorro.png', fit: BoxFit.cover), // Use a imagem local padrão se o URL estiver vazio
+                            ? Image.network(cachorro['image'],
+                                fit: BoxFit
+                                    .cover) // Use a imagem do URL se estiver disponível
+                            : Image.asset('imagens/cachorro.png',
+                                fit: BoxFit
+                                    .cover), // Use a imagem local padrão se o URL estiver vazio
                       ),
                     ),
-                    const SizedBox(width: 16), // Espaçamento entre a imagem e os detalhes do cachorro
+                    const SizedBox(
+                        width:
+                            16), // Espaçamento entre a imagem e os detalhes do cachorro
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,12 +186,18 @@ void excluirDog(String petId) {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text('Raça: ${cachorro['raca']}', style: const TextStyle(fontSize: 16)),
-                          Text('Porte: ${cachorro['porte']}', style: const TextStyle(fontSize: 16)),
-                          Text('Sexo: ${cachorro['sexo']}', style: const TextStyle(fontSize: 16)),
-                          Text('Idade: ${cachorro['idade']}', style: const TextStyle(fontSize: 16)),
-                          Text('Peso: ${cachorro['peso']}', style: const TextStyle(fontSize: 16)),
-                          Text('Observações: ${cachorro['observacoes']}', style: const TextStyle(fontSize: 16)),
+                          Text('Raça: ${cachorro['raca']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Porte: ${cachorro['porte']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Sexo: ${cachorro['sexo']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Idade: ${cachorro['idade']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Peso: ${cachorro['peso']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Observações: ${cachorro['observacoes']}',
+                              style: const TextStyle(fontSize: 16)),
                         ],
                       ),
                     ),
@@ -195,7 +208,13 @@ void excluirDog(String petId) {
                           iconSize: 24,
                           icon: const Icon(Icons.edit),
                           onPressed: () {
-                            editarPet(cachorro['id'], cachorro['nome'], cachorro['raca'], cachorro['idade'], cachorro['peso'], cachorro['observacoes']);
+                            editarPet(
+                                cachorro['id'],
+                                cachorro['nome'],
+                                cachorro['raca'],
+                                cachorro['idade'],
+                                cachorro['peso'],
+                                cachorro['observacoes']);
                           },
                         ),
                         IconButton(
@@ -203,7 +222,6 @@ void excluirDog(String petId) {
                           icon: const Icon(Icons.delete),
                           onPressed: () {
                             excluirDog(cachorro['id']);
-
                           },
                         ),
                       ],
@@ -216,16 +234,14 @@ void excluirDog(String petId) {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const TelaAddPet())
-        );
-      },
-      child: const Icon(Icons.add),
-      backgroundColor: const Color(0xFF10428B),
-    ),
-    bottomNavigationBar: AnimatedContainer(
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const TelaAddPet()));
+        },
+        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF10428B),
+      ),
+      bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         height: _isVisible ? 60.0 : 0.0,
         decoration: const BoxDecoration(
@@ -239,31 +255,33 @@ void excluirDog(String petId) {
           ],
         ),
         child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color.fromARGB(255, 255, 251, 248),
-            currentIndex: _currentIndex,
-            unselectedItemColor: const Color.fromARGB(255, 3, 22, 50), // Cor dos itens não selecionados
-            selectedItemColor: const Color(0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
-            onTap: navegar,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.search),
-                label: 'Pesquisa',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.favorite),
-                label: 'Favoritos',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person),
-                label: 'Perfil',
-              ),
-            ],
-          ),
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color.fromARGB(255, 255, 251, 248),
+          currentIndex: _currentIndex,
+          unselectedItemColor: const Color.fromARGB(
+              255, 3, 22, 50), // Cor dos itens não selecionados
+          selectedItemColor: const Color(
+              0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
+          onTap: navegar,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Pesquisa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favoritos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
     );
   }

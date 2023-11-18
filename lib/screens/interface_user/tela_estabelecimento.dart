@@ -94,7 +94,7 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
 
             if (banhoTosaSnapshot.docs.isNotEmpty ||
                 vetSnapshot.docs.isNotEmpty ||
-                petHotelSnapshot.docs.isEmpty) {
+                petHotelSnapshot.docs.isNotEmpty) {
               setState(() {
                 agenda = true;
               });
@@ -143,14 +143,18 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
             int avaliacoes = avaliacoesQuerySnapshot.size;
 
             if (avaliacoes < agendamentos) {
-              setState(() {
-                avaliacaoDisponivel = true;
-              });
+              if (mounted) {
+                setState(() {
+                  avaliacaoDisponivel = true;
+                });
+              }
             }
           } else {
-            setState(() {
-              avaliacaoDisponivel = true;
-            });
+            if (mounted) {
+              setState(() {
+                avaliacaoDisponivel = false;
+              });
+            }
           }
         }
       } on FirebaseException catch (e) {

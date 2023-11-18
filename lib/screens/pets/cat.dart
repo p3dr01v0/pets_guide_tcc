@@ -53,7 +53,7 @@ class _InfoGatosState extends State<InfoGatos> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const telaFavoritos()),
+        MaterialPageRoute(builder: (context) => TelaFavoritos()),
       );
       print("Favoritos");
     } else if (index == 3) {
@@ -95,7 +95,8 @@ class _InfoGatosState extends State<InfoGatos> {
     }
   }
 
-  void editarPet(String petId, String nome, String raca, String idade, String peso, String observacoes) async {
+  void editarPet(String petId, String nome, String raca, String idade,
+      String peso, String observacoes) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -160,7 +161,8 @@ class _InfoGatosState extends State<InfoGatos> {
                       child: ClipOval(
                         child: gato['image'] != ''
                             ? Image.network(gato['image'], fit: BoxFit.cover)
-                            : Image.asset('imagens/gato.png', fit: BoxFit.cover),
+                            : Image.asset('imagens/gato.png',
+                                fit: BoxFit.cover),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -177,12 +179,18 @@ class _InfoGatosState extends State<InfoGatos> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          Text('Raça: ${gato['raca']}', style: const TextStyle(fontSize: 16)),
-                          Text('Porte: ${gato['porte']}', style: const TextStyle(fontSize: 16)),
-                          Text('Sexo: ${gato['sexo']}', style: const TextStyle(fontSize: 16)),
-                          Text('Idade: ${gato['idade']}', style: const TextStyle(fontSize: 16)),
-                          Text('Peso: ${gato['peso']}', style: const TextStyle(fontSize: 16)),
-                          Text('Observações: ${gato['observacoes']}', style: const TextStyle(fontSize: 16)),
+                          Text('Raça: ${gato['raca']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Porte: ${gato['porte']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Sexo: ${gato['sexo']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Idade: ${gato['idade']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Peso: ${gato['peso']}',
+                              style: const TextStyle(fontSize: 16)),
+                          Text('Observações: ${gato['observacoes']}',
+                              style: const TextStyle(fontSize: 16)),
                         ],
                       ),
                     ),
