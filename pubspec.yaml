@@ -1,0 +1,53 @@
+name: flutter_application_1
+description: Um novo projeto Flutter.
+
+publish_to: 'none' # Remove esta linha se você quiser publicar no pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.1.1 <4.0.0'
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  firebase_core: ^2.15.1 #ok n3
+  firebase_auth: ^4.9.0 #ok n2
+  cloud_firestore: ^4.9.3 #ok n1
+  firebase_storage: ^11.2.7 #ok n4
+  image_picker: ^1.0.4 #ok n5
+  get_it: ^7.6.4
+  google_fonts: ^6.1.0
+  logger: ^2.0.2+1
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.18.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0 #ok
+
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: fonts/Roboto-Regular.ttf
+        - asset: fonts/Roboto-Bold.ttf
+          #weight: 700
+        - asset: fonts/Roboto-Italic.ttf
+          #style: italic
+          #weight: 400
+
+
+  assets:
+    - imagens/logo.png
+    - imagens/user.png
+    - imagens/cachorro.png
+    - imagens/gato.png
+    - imagens/estabelecimento.png
