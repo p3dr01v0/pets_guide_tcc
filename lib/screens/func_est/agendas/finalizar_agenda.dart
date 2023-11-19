@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/style/style.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger();
@@ -118,8 +119,11 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor:
+            const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
         appBar: AppBar(
           title: const Text('Criação de agenda'),
+          backgroundColor: const Color(0xFF10428B),
         ),
         body: SingleChildScrollView(
           child: Form(
@@ -134,7 +138,8 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
                             children: [
                               Container(
                                 alignment: Alignment.topCenter,
-                                width: 150,
+                                width: 125,
+                                height: 200, // Defina a altura desejada
                                 child: Column(
                                   children: [
                                     const Text(
@@ -146,16 +151,20 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
                                     ),
                                     for (int i = 0; i < 7; i++)
                                       if (widget.diasFuncionamento[i])
-                                        Text(
-                                          nomesDias[i],
+                                        SizedBox(
+                                          height: 24,
+                                          child: Text(
+                                            nomesDias[i],
+                                            style: const TextStyle(),
+                                          ),
                                         )
                                   ],
                                 ),
                               ),
                               Container(
                                 alignment: Alignment.topCenter,
-                                width: 150,
-                                height: 200,
+                                width: 125,
+                                height: 200, // Defina a altura desejada
                                 child: Column(
                                   children: [
                                     const Text(
@@ -170,12 +179,11 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
                                         child: GridView.builder(
                                           gridDelegate:
                                               const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount:
-                                                2, // Número de colunas desejado
+                                            crossAxisCount: 2,
                                             crossAxisSpacing:
-                                                0.001, // Espaçamento entre as colunas
+                                                20.0, // Ajuste conforme necessário
                                             mainAxisSpacing:
-                                                0.001, // Espaçamento entre as linhas
+                                                1.0, // Ajuste conforme necessário
                                           ),
                                           itemCount: widget.horarios.length,
                                           itemBuilder: (BuildContext context,
@@ -213,22 +221,44 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
                     const SizedBox(
                       height: 16,
                     ),
-                    TextFormField(
-                      controller: _nomeAgendaController,
-                      decoration: const InputDecoration(labelText: 'Nome'),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Digite o nome da sua agenda';
-                        }
-                        return null;
-                      },
+                    const Divider(
+                      thickness: 1.0,
+                      indent: 45,
+                      endIndent: 45,
+                    ),
+                    const SizedBox(height: 16.0),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          vertical:
+                              10.0), // Adicione margem vertical conforme necessário
+                      width: 300.0,
+                      height: 45.0, // Defina a largura desejada
+                      child: TextFormField(
+                        controller: _nomeAgendaController,
+                        decoration: caixaTxt("Nome da agenda"),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Digite o nome da sua agenda';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
                     const SizedBox(
                       height: 20,
                     ),
                     ElevatedButton(
-                        onPressed: _submit, child: const Text('Salvar Agenda')),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF10428B),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            fixedSize: const Size(200, 32)),
+                        onPressed: _submit,
+                        child: const Text(
+                          'Salvar Agenda',
+                          style: TextStyle(color: Colors.white),
+                        )),
                     Text(repetido),
                   ],
                 )),

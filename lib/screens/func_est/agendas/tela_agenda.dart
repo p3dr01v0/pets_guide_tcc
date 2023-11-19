@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/screens/func_est/agendas/ver_agendamentos_hotel.dart';
 import 'package:flutter_application_1/screens/func_est/agendas/ver_solicitacoes_hotel.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/telaDiasFuncionamento.dart';
+import 'package:flutter_application_1/screens/func_est/agendas/telaDiasFuncionamento.dart';
+import 'package:flutter_application_1/screens/func_est/agendas/ver_agendamentos.dart';
+import 'package:flutter_application_1/screens/func_est/agendas/ver_solicitacoes.dart';
 import 'package:flutter_application_1/screens/func_est/historicos/tela_select_hist.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/ver_agendamentos.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/ver_solicitacoes.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class TelaAgenda extends StatefulWidget {
   final String typeService;
@@ -72,7 +72,7 @@ class _TelaAgendaState extends State<TelaAgenda> {
       backgroundColor:
           const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        title: const Text('Selecione a agenda'),
+        title: const Text('Selecionar agenda'),
         backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
@@ -87,7 +87,7 @@ class _TelaAgendaState extends State<TelaAgenda> {
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30)),
-                            fixedSize: const Size(125, 30),
+                            fixedSize: const Size(150, 30),
                             backgroundColor:
                                 const Color.fromARGB(255, 255, 149, 0)),
                         onPressed: () {
@@ -97,7 +97,13 @@ class _TelaAgendaState extends State<TelaAgenda> {
                                   builder: (context) => TelaDiasFuncionamento(
                                       typeService: widget.typeService)));
                         },
-                        child: const Text('Criar Agenda'),
+                        child: const Text(
+                          'Criar Agenda',
+                          style: TextStyle(
+                            fontSize: 14, // Tamanho do texto
+                            color: Colors.white, // Cor do texto
+                          ),
+                        ),
                       ),
                       OutlinedButton(
                           style: OutlinedButton.styleFrom(
@@ -105,7 +111,7 @@ class _TelaAgendaState extends State<TelaAgenda> {
                                 color: Color.fromARGB(255, 255, 149, 0)),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30)),
-                            fixedSize: const Size(125, 30),
+                            fixedSize: const Size(150, 30),
                           ),
                           onPressed: () {
                             Navigator.push(
@@ -118,6 +124,7 @@ class _TelaAgendaState extends State<TelaAgenda> {
                           child: const Text('Histórico',
                               style: TextStyle(
                                 color: Color.fromARGB(255, 255, 149, 0),
+                                fontWeight: FontWeight.bold, // Negrito
                               ))),
                     ],
                   ),

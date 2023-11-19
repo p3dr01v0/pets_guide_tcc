@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/cad_log/cad_log_est.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/validarCriacao.dart';
+import 'package:flutter_application_1/screens/func_est/atividade_est/validarCriacao.dart';
 
 class ValidacaoEstabelecimento extends StatefulWidget {
   @override

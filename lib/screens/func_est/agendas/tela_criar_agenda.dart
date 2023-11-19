@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/finalizar_agenda.dart';
+import 'package:flutter_application_1/screens/func_est/agendas/finalizar_agenda.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TelaCriarAgenda extends StatefulWidget {
@@ -60,7 +60,8 @@ class _TelaCriarAgendaState extends State<TelaCriarAgenda> {
     if (uid.isNotEmpty) {
       setState(() {
         servicesQuery = _firestore
-            .collection('estabelecimentos/${_user!.uid}/${widget.typeService}').where('nomeServico', isNull: false);
+            .collection('estabelecimentos/${_user!.uid}/${widget.typeService}')
+            .where('nomeServico', isNull: false);
       });
     }
   }
@@ -68,8 +69,10 @@ class _TelaCriarAgendaState extends State<TelaCriarAgenda> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 255, 243, 236),
         appBar: AppBar(
           title: const Text('Criação de agenda'),
+          backgroundColor: const Color(0xFF10428B),
         ),
         body: Center(
           child: Column(
@@ -86,18 +89,30 @@ class _TelaCriarAgendaState extends State<TelaCriarAgenda> {
                       return const CircularProgressIndicator();
                     }
                     final services = snapshot.data!.docs;
-                
+
                     return ListView.builder(
-                      
                       itemCount: services.length,
                       itemBuilder: (context, index) {
                         final service =
                             services[index].data() as Map<String, dynamic>;
-                        final serviceName = service['nomeServico'] as String? ?? ''; 
-                
+                        final serviceName =
+                            service['nomeServico'] as String? ?? '';
+
                         return ListTile(
                           title: Text(serviceName),
                           trailing: Checkbox(
+                            checkColor: Colors.white, // Cor do ícone de seleção
+                            fillColor: MaterialStateProperty.resolveWith<Color>(
+                              (Set<MaterialState> states) {
+                                if (states.contains(MaterialState.selected)) {
+                                  return Colors
+                                      .orange; // Cor de fundo quando selecionado
+                                } else {
+                                  return Colors
+                                      .transparent; // Sem cor de fundo quando não selecionado
+                                }
+                              },
+                            ),
                             value: checkboxValues[serviceName] ?? false,
                             onChanged: (bool? newValue) {
                               setState(() {
@@ -113,11 +128,15 @@ class _TelaCriarAgendaState extends State<TelaCriarAgenda> {
                         );
                       },
                     );
-                    
                   },
                 ),
               ),
               ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF10428B),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
+                      fixedSize: const Size(200, 32)),
                   onPressed: () {
                     Navigator.push(
                         context,
@@ -129,7 +148,10 @@ class _TelaCriarAgendaState extends State<TelaCriarAgenda> {
                                   typeService: widget.typeService,
                                 )));
                   },
-                  child: const Text('Avançar'))
+                  child: const Text(
+                    'Avançar',
+                    style: TextStyle(color: Colors.white),
+                  ))
             ],
           ),
         ));

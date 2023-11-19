@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/tela_criar_agenda.dart';
+import 'package:flutter_application_1/screens/func_est/agendas/tela_criar_agenda.dart';
 import 'package:intl/intl.dart';
 
 class TelaHorarios extends StatefulWidget {
@@ -13,9 +13,6 @@ class TelaHorarios extends StatefulWidget {
 }
 
 class _TelaHorariosState extends State<TelaHorarios> {
-
-  
-
   List<String> nomesDias = [
     'Segunda-feira',
     'Terça-feira',
@@ -91,9 +88,7 @@ class _TelaHorariosState extends State<TelaHorarios> {
 
         generatedTimes.add(DateFormat('HH:mm').format(currentTime));
         currentTime = nextTime;
-        
       }
-      
     }
 
     setState(() {});
@@ -102,8 +97,10 @@ class _TelaHorariosState extends State<TelaHorarios> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
       appBar: AppBar(
         title: const Text('Seleção de horários'),
+        backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
           child: SingleChildScrollView(
@@ -114,21 +111,46 @@ class _TelaHorariosState extends State<TelaHorarios> {
             ),
             Text(
                 'Horario atual selecionado ${horaAbertura.format(context).toString()}'),
-            ElevatedButton(
+            OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  textStyle: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 255, 149, 0)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                  fixedSize: const Size(210, 30),
+                ),
                 onPressed: _showStartTimePicker,
-                child: const Text('Selecionar Horario inicial')),
+                child: const Text(
+                  'Selecionar Horario inicial',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 255, 149, 0)),
+                )),
             const SizedBox(
               height: 20,
             ),
             Text(
                 'Horario atual selecionado ${horaFechamento.format(context).toString()}'),
-            ElevatedButton(
+            OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                    textStyle: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 255, 149, 0)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                    fixedSize: const Size(210, 30)),
                 onPressed: _showEndTimePicker,
-                child: const Text('Selecionar Horario final')),
+                child: const Text('Selecionar Horario final',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 255, 149, 0)))),
             const SizedBox(
               height: 15,
             ),
-            const Text('Selecione o Intervalo entre cada horario:'),
+            const Text(
+              'Selecione o Intervalo entre cada horario:',
+            ),
             DropdownButton<int>(
               // seleção de intervalo em Horas
               value: selectedIntervalHours,
@@ -140,7 +162,7 @@ class _TelaHorariosState extends State<TelaHorarios> {
               items: intervalHours.map((int intervalH) {
                 return DropdownMenuItem<int>(
                   value: intervalH,
-                  child: Text('$intervalH horas'),
+                  child: Text('$intervalH hora(s)'),
                 );
               }).toList(),
             ),
@@ -162,8 +184,14 @@ class _TelaHorariosState extends State<TelaHorarios> {
             ),
             const SizedBox(height: 35),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                  fixedSize: const Size(150, 30),
+                  backgroundColor: const Color.fromARGB(255, 255, 149, 0)),
               onPressed: generateTimes,
-              child: const Text('Gerar Horários'),
+              child: const Text('Gerar Horários',
+                  style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 16),
             const Text('Horários Gerados:'),
@@ -177,6 +205,11 @@ class _TelaHorariosState extends State<TelaHorarios> {
               const Text('Nenhum horário gerado.'),
             const SizedBox(height: 30),
             ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10428B),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
+                    fixedSize: const Size(200, 32)),
                 onPressed: () {
                   Navigator.push(
                       context,
@@ -187,7 +220,10 @@ class _TelaHorariosState extends State<TelaHorarios> {
                                 typeService: widget.typeService,
                               )));
                 },
-                child: const Text('Avançar'))
+                child: const Text(
+                  'Avançar',
+                  style: TextStyle(color: Colors.white),
+                ))
           ],
         ),
       )),

@@ -50,7 +50,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       try {
         // Suponha que você tenha uma coleção chamada 'favoritos' que contém os IDs dos estabelecimentos favoritos
         QuerySnapshot favoritosSnapshot =
-            await _firestore.collection('usuario/$uid/favoritos').get();
+            await _firestore.collection('user/$uid/favoritos').get();
 
         favoritosSnapshot.docs.forEach((DocumentSnapshot doc) {
           favoritos.add(doc['estabelecimento']);
@@ -70,7 +70,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       if (favoritos.isNotEmpty) {
         try {
           return _firestore
-              .collectionGroup('informacoes')
+              .collectionGroup('info')
               .where('UID', whereIn: favoritos)
               .snapshots();
         } on FirebaseException catch (e) {
@@ -88,7 +88,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       final String uid = _user!.uid;
       try {
         QuerySnapshot favoritoExistente = await _firestore
-            .collection('usuario/$uid/favoritos')
+            .collection('user/$uid/favoritos')
             .where("estabelecimento", isEqualTo: idEstabelecimento)
             .get();
 
@@ -96,14 +96,14 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
           // O favorito já existe, então remova
           var favoritoId = favoritoExistente.docs.first.id;
           await _firestore
-              .collection('usuario/$uid/favoritos')
+              .collection('user/$uid/favoritos')
               .doc(favoritoId)
               .delete();
 
           logger.d('Favorito removido com sucesso.');
         } else {
           await _firestore
-              .collection('usuario/$uid/favoritos')
+              .collection('user/$uid/favoritos')
               .add({"estabelecimento": idEstabelecimento}).then(
                   (DocumentReference doc) {
             logger.d('Favorito adicionado com ID: $doc');
@@ -125,7 +125,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
     final String uid = _user!.uid;
 
     Stream<QuerySnapshot> querySnapshots = _firestore
-        .collection('usuario/$uid/favoritos')
+        .collection('user/$uid/favoritos')
         .where(
           "estabelecimento",
         )

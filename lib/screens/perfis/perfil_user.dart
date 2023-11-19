@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
-import 'package:flutter_application_1/screens/interface_user/home.dart';
+//import 'package:flutter_application_1/screens/interface_user/home.dart';
+import 'package:flutter_application_1/screens/interface_user/home_teste.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import '../cad_log/cad_log_user.dart';
@@ -39,7 +40,7 @@ class _perfilUserState extends State<perfilUser> {
     if (index == 0) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const homeUser()),
+        MaterialPageRoute(builder: (context) => TelaInicial()),
       );
       print("Home");
     } else if (index == 1) {
@@ -88,7 +89,6 @@ class _perfilUserState extends State<perfilUser> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFEAD9),
       appBar: AppBar(
         backgroundColor: const Color(0xFF10428B),
         title: const Text('Perfil do Usuário'),
@@ -265,12 +265,12 @@ class _perfilUserState extends State<perfilUser> {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: const Color(0xFF10428B),
+          backgroundColor: const Color.fromARGB(255, 255, 251, 248),
           currentIndex: _currentIndex,
           unselectedItemColor: const Color.fromARGB(
               255, 3, 22, 50), // Cor dos itens não selecionados
-          selectedItemColor: const Color.fromARGB(255, 255, 255,
-              255), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
+          selectedItemColor: const Color(
+              0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
           onTap: navegar,
           items: const [
             BottomNavigationBarItem(
@@ -291,7 +291,6 @@ class _perfilUserState extends State<perfilUser> {
             ),
           ],
         ),
-        //fim da barra de navegação inferior
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_serv_est.dart';
-import 'package:flutter_application_1/screens/func_est/estabelecimento/tela_agenda.dart';
+import 'package:flutter_application_1/screens/func_est/agendas/tela_agenda.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -37,18 +37,25 @@ class _TelaVeterinarioState extends State<TelaVeterinario> {
   }
 
   Future<void> _fetchProviders(String uid) async {
-    final estabelecimentoReference = _firestore.collection('estabelecimentos').doc(uid);
+    final estabelecimentoReference =
+        _firestore.collection('estabelecimentos').doc(uid);
 
-    estabelecimentoReference.get().then((DocumentSnapshot estabelecimentoSnapshot) {
+    estabelecimentoReference
+        .get()
+        .then((DocumentSnapshot estabelecimentoSnapshot) {
       if (estabelecimentoSnapshot.exists) {
-        final estabelecimentoData = estabelecimentoSnapshot.data() as Map<String, dynamic>?;
+        final estabelecimentoData =
+            estabelecimentoSnapshot.data() as Map<String, dynamic>?;
 
-        if (estabelecimentoData != null && estabelecimentoData['servico'] == true) {
+        if (estabelecimentoData != null &&
+            estabelecimentoData['servico'] == true) {
           final veterinarioReference = estabelecimentoReference
-          .collection('veterinario')
-          .where('nomeServico', isNull: false);
+              .collection('veterinario')
+              .where('nomeServico', isNull: false);
 
-          veterinarioReference.get().then((QuerySnapshot veterinarioQuerySnapshot) {
+          veterinarioReference
+              .get()
+              .then((QuerySnapshot veterinarioQuerySnapshot) {
             if (veterinarioQuerySnapshot.docs.isNotEmpty) {
               setState(() {
                 _providers = veterinarioQuerySnapshot.docs
@@ -57,7 +64,8 @@ class _TelaVeterinarioState extends State<TelaVeterinario> {
               });
               print('A subcoleção "veterinario" existe para o usuário $uid.');
             } else {
-              print('A subcoleção "veterinario" não existe para o usuário $uid.');
+              print(
+                  'A subcoleção "veterinario" não existe para o usuário $uid.');
             }
           }).catchError((error) {
             print('Erro ao consultar a subcoleção "veterinario": $error');
@@ -84,18 +92,41 @@ class _TelaVeterinarioState extends State<TelaVeterinario> {
       body: Center(
         child: _user != null
             ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        top: 20.0), // espaçamento para app bar e o botão
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF10428B),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        fixedSize: const Size(200, 32),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
                           context,
-                        MaterialPageRoute( builder: (context) => TelaAgenda(
-                      typeService: typeService)));
-                    },
-                    child: const Text('Checar Agenda'),
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                TelaAgenda(typeService: typeService),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Checar Agenda',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
-                  Text('ID do usuário autenticado: ${_user!.uid}'),
-                  const Text(' disponíveis:'),
+                  const SizedBox(
+                    height: 14,
+                  ),
+                  const Text('Serviços vetrinários:'),
+                  const SizedBox(
+                    height: 12,
+                  ),
                   Expanded(
                     child: ListView.builder(
                       itemCount: _providers.length,
@@ -127,16 +158,17 @@ class _TelaVeterinarioState extends State<TelaVeterinario> {
               )
             : const Text('Nenhum usuário autenticado'),
       ),
-            floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const telaAddServ())
-          );
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const telaAddServ()));
         },
         backgroundColor: const Color(0xFF10428B),
-        child: const Icon(Icons.add),
-      )
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
