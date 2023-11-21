@@ -152,81 +152,88 @@ class _InfoCachorrosState extends State<InfoCachorros> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      child: ClipOval(
-                        child: cachorro['image'] != ''
-                            ? Image.network(cachorro['image'],
-                                fit: BoxFit
-                                    .cover) // Use a imagem do URL se estiver disponível
-                            : Image.asset('imagens/cachorro.png',
-                                fit: BoxFit
-                                    .cover), // Use a imagem local padrão se o URL estiver vazio
+              child: Container(
+                height: 220, // Ajuste a altura conforme necessário
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: ClipOval(
+                          child: cachorro['image'] != ''
+                              ? Image.network(
+                                  cachorro['image'],
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  'imagens/cachorro.png',
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                        width:
-                            16), // Espaçamento entre a imagem e os detalhes do cachorro
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Nome: ${cachorro['nome']}',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Nome: ${cachorro['nome']}',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      iconSize: 24,
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () {
+                                        editarPet(
+                                          cachorro['id'],
+                                          cachorro['nome'],
+                                          cachorro['raca'],
+                                          cachorro['idade'],
+                                          cachorro['peso'],
+                                          cachorro['observacoes'],
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      iconSize: 24,
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        excluirDog(cachorro['id']);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('Raça: ${cachorro['raca']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Porte: ${cachorro['porte']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Sexo: ${cachorro['sexo']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Idade: ${cachorro['idade']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Peso: ${cachorro['peso']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Observações: ${cachorro['observacoes']}',
-                              style: const TextStyle(fontSize: 16)),
-                        ],
+                            Text('Raça: ${cachorro['raca']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Porte: ${cachorro['porte']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Sexo: ${cachorro['sexo']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Idade: ${cachorro['idade']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Peso: ${cachorro['peso']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Observações: ${cachorro['observacoes']}',
+                                style: const TextStyle(fontSize: 16)),
+                          ],
+                        ),
                       ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          iconSize: 24,
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            editarPet(
-                                cachorro['id'],
-                                cachorro['nome'],
-                                cachorro['raca'],
-                                cachorro['idade'],
-                                cachorro['peso'],
-                                cachorro['observacoes']);
-                          },
-                        ),
-                        IconButton(
-                          iconSize: 24,
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            excluirDog(cachorro['id']);
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -238,8 +245,11 @@ class _InfoCachorrosState extends State<InfoCachorros> {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => const TelaAddPet()));
         },
-        child: const Icon(Icons.add),
         backgroundColor: const Color(0xFF10428B),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

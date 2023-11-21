@@ -150,77 +150,88 @@ class _InfoGatosState extends State<InfoGatos> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      child: ClipOval(
-                        child: gato['image'] != ''
-                            ? Image.network(gato['image'], fit: BoxFit.cover)
-                            : Image.asset('imagens/gato.png',
-                                fit: BoxFit.cover),
+              child: Container(
+                height: 220, // Ajuste a altura conforme necessário
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 100,
+                        child: ClipOval(
+                          child: gato['image'] != ''
+                              ? Image.network(
+                                  gato['image'],
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.asset(
+                                  'imagens/gato.png',
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Nome: ${gato['nome']}',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Nome: ${gato['nome']}',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      iconSize: 24,
+                                      icon: const Icon(Icons.edit),
+                                      onPressed: () {
+                                        editarPet(
+                                          gato['id'],
+                                          gato['nome'],
+                                          gato['raca'],
+                                          gato['idade'],
+                                          gato['peso'],
+                                          gato['observacoes'],
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      iconSize: 24,
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        excluirCat(gato['id']);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text('Raça: ${gato['raca']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Porte: ${gato['porte']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Sexo: ${gato['sexo']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Idade: ${gato['idade']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Peso: ${gato['peso']}',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Observações: ${gato['observacoes']}',
-                              style: const TextStyle(fontSize: 16)),
-                        ],
+                            Text('Raça: ${gato['raca']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Porte: ${gato['porte']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Sexo: ${gato['sexo']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Idade: ${gato['idade']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Peso: ${gato['peso']}',
+                                style: const TextStyle(fontSize: 16)),
+                            Text('Observações: ${gato['observacoes']}',
+                                style: const TextStyle(fontSize: 16)),
+                          ],
+                        ),
                       ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          iconSize: 24,
-                          icon: const Icon(Icons.edit),
-                          onPressed: () {
-                            editarPet(
-                              gato['id'],
-                              gato['nome'],
-                              gato['raca'],
-                              gato['idade'],
-                              gato['peso'],
-                              gato['observacoes'],
-                            );
-                          },
-                        ),
-                        IconButton(
-                          iconSize: 24,
-                          icon: const Icon(Icons.delete),
-                          onPressed: () {
-                            excluirCat(gato['id']);
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -234,8 +245,11 @@ class _InfoGatosState extends State<InfoGatos> {
             MaterialPageRoute(builder: (context) => const TelaAddPet()),
           );
         },
-        child: const Icon(Icons.add),
         backgroundColor: const Color(0xFF10428B),
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

@@ -23,7 +23,6 @@ class _TelaInicialState extends State<TelaInicial> {
   @override
   void initState() {
     super.initState();
-    // Verifique se há um usuário autenticado quando o widget é iniciado
     _checkCurrentUser();
   }
 
@@ -35,7 +34,6 @@ class _TelaInicialState extends State<TelaInicial> {
         _user = user;
       });
 
-      // Consulta os estabelecimentos do usuário com base no UID
       await _fetchProviders(user.uid);
     }
   }
@@ -55,14 +53,8 @@ class _TelaInicialState extends State<TelaInicial> {
           QuerySnapshot infoQuerySnapshot = await infoReference.get();
 
           if (infoQuerySnapshot.docs.isNotEmpty) {
-            // A subcoleção "info" existe neste documento de "estabelecimento"
             providers.add(
                 infoQuerySnapshot.docs.first.data() as Map<String, dynamic>);
-            // ignore: avoid_print
-            print('A subcoleção "info" existe neste documento.');
-          } else {
-            // A subcoleção "info" não existe neste documento de "estabelecimento"
-            print('A subcoleção "info" não existe neste documento.');
           }
         }
 
@@ -90,7 +82,6 @@ class _TelaInicialState extends State<TelaInicial> {
             .get();
 
         if (favoritoExistente.docs.isNotEmpty) {
-          // O favorito já existe, então remova
           var favoritoId = favoritoExistente.docs.first.id;
           await _firestore
               .collection('user/$uid/favoritos')
@@ -115,8 +106,7 @@ class _TelaInicialState extends State<TelaInicial> {
 
   Stream<bool> _isFavoriteStream(String? estabelecimentoId) {
     if (_user == null || estabelecimentoId == null) {
-      return Stream.value(
-          false); // Se o usuário não estiver autenticado, o estabelecimento não é favorito
+      return Stream.value(false);
     }
 
     final String uid = _user!.uid;
@@ -151,108 +141,134 @@ class _TelaInicialState extends State<TelaInicial> {
                         final num notaMedia =
                             provider['notaMedia'] as num? ?? 0;
 
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          elevation: 2.0,
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          child: ListTile(
-                            onTap: () {
-                              final estabelecimentoId =
-                                  provider['UID'] as String?;
-                              // Navegue para a tela do estabelecimento com base no ID.
-                              if (estabelecimentoId != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => TelaEstabelecimento(
-                                        estabelecimentoId: estabelecimentoId),
-                                  ),
-                                );
-                              }
-                            },
-                            title: Text('Nome: ${provider['nome']}'),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Telefone: ${provider['telefone']}'),
-                                const SizedBox(
-                                  height: 12,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      '${provider['servicosConcluidos']} Serviços Concluídos',
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    RatingBarIndicator(
-                                      itemSize: 15,
-                                      rating: notaMedia.toDouble(),
-                                      itemBuilder: (context, index) =>
-                                          const Icon(
-                                        Icons.star_rounded,
-                                        color: Colors.amber,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ],
+                        return Container(
+                          height: 120, // Ajuste o valor conforme necessário
+                          margin: const EdgeInsets.all(
+                              8.0), // Ajuste as margens internas conforme necessário
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                            leading: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                provider['imageEstabelecimento'] == null
-                                    ? const Icon(
-                                        Icons.store,
-                                        size: 36,
-                                      )
-                                    : ClipRRect(
-                                        borderRadius: BorderRadius.circular(90),
-                                        child: Image.network(
-                                          provider['imageEstabelecimento'],
-                                          width: 72,
-                                          height: 72,
-                                        ),
+                            elevation: 2.0,
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              onTap: () {
+                                final estabelecimentoId =
+                                    provider['UID'] as String?;
+                                if (estabelecimentoId != null) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TelaEstabelecimento(
+                                        estabelecimentoId: estabelecimentoId,
                                       ),
-                              ],
-                            ),
-                            trailing: StreamBuilder<bool>(
-                              stream:
-                                  _isFavoriteStream(provider['UID'] as String?),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  // Indicador de carregamento, se necessário
-                                  return const CircularProgressIndicator();
-                                } else if (snapshot.hasError) {
-                                  // Trate o erro, se ocorrer
-                                  return Text(
-                                      'Erro ao verificar favorito: ${snapshot.error}');
-                                } else {
-                                  // Use o resultado para determinar se é um favorito
-                                  bool isFavorite = snapshot.data ?? false;
-
-                                  return IconButton(
-                                    onPressed: () {
-                                      _selecionarFavoritos(
-                                          provider['UID'] as String?);
-                                    },
-                                    icon: Icon(
-                                      isFavorite
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: const Color.fromARGB(
-                                          255, 255, 168, 7),
                                     ),
                                   );
                                 }
                               },
+                              title: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Flexible(
+                                    child: Text('Nome: ${provider['nome']}'),
+                                  ),
+                                  StreamBuilder<bool>(
+                                    stream: _isFavoriteStream(
+                                        provider['UID'] as String?),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const CircularProgressIndicator();
+                                      } else if (snapshot.hasError) {
+                                        return Text(
+                                          'Erro ao verificar favorito: ${snapshot.error}',
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                          ),
+                                        );
+                                      } else {
+                                        bool isFavorite =
+                                            snapshot.data ?? false;
+
+                                        return IconButton(
+                                          onPressed: () {
+                                            _selecionarFavoritos(
+                                                provider['UID'] as String?);
+                                          },
+                                          icon: Icon(
+                                            isFavorite
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                            color: const Color.fromARGB(
+                                                255, 255, 168, 7),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Telefone: ${provider['contato']}'),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          '${provider['servicosConcluidos']} Serviços Concluídos',
+                                          style: const TextStyle(fontSize: 12),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      RatingBarIndicator(
+                                        itemSize: 15,
+                                        rating: notaMedia.toDouble(),
+                                        itemBuilder: (context, index) =>
+                                            const Icon(
+                                          Icons.star_rounded,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              leading: Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    provider['imageEstabelecimento'] == null
+                                        ? const Icon(
+                                            Icons.store,
+                                            size: 36,
+                                          )
+                                        : Padding(
+                                            padding: const EdgeInsets.only(
+                                                top: 10.0),
+                                            child: ClipOval(
+                                              child: Image.network(
+                                                provider[
+                                                    'imageEstabelecimento'],
+                                                width: 55,
+                                                height: 55,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                  ],
+                                ),
+                              ),
+                              isThreeLine: true,
                             ),
-                            isThreeLine: true,
                           ),
                         );
                       }).toList(),

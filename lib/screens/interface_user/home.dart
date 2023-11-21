@@ -272,7 +272,7 @@ class _homeUserState extends State<homeUser> {
                                       )
                                     : imgEst(), // Use imgEst aqui
                               ),
-                              trailing: const Icon(Icons.more_vert),
+                              trailing: const Icon(Icons.favorite),
                               isThreeLine: true,
                             ),
                           ),

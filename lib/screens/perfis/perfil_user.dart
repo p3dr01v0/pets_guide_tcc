@@ -1,9 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
-//import 'package:flutter_application_1/screens/interface_user/home.dart';
-import 'package:flutter_application_1/screens/interface_user/home_teste.dart';
+import 'package:flutter_application_1/screens/interface_user/home.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import '../cad_log/cad_log_user.dart';
@@ -40,7 +41,7 @@ class _perfilUserState extends State<perfilUser> {
     if (index == 0) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => TelaInicial()),
+        MaterialPageRoute(builder: (context) => const homeUser()),
       );
       print("Home");
     } else if (index == 1) {
@@ -149,22 +150,46 @@ class _perfilUserState extends State<perfilUser> {
               elevation: 5.0,
               margin: const EdgeInsets.all(16.0),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(
-                    12.0), // Ajuste o valor conforme necessário
+                borderRadius: BorderRadius.circular(12.0),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment
-                      .center, // Alinhe verticalmente ao centro
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    imgUser(), // Componente para exibir a imagem do usuário
-                    const SizedBox(
-                        width: 16.0), // Espaçamento entre a imagem e os textos
+                    Stack(
+                      children: [
+                        imgUser(), // Componente para exibir a imagem do usuário
+                        Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              width: 30.0, // Controle da largura do círculo
+                              height: 30.0, // Controle da altura do círculo
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors
+                                    .white, //Cor de fundo do círculo do ícone
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.edit,
+                                  color: Colors.black, //Cor do ícone de edição
+                                ),
+                                iconSize: 15.0, //tamanho do ícone aqui
+                                onPressed: () {
+                                  print("editar usuario");
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16.0),
                     Expanded(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Alinhe verticalmente ao centro
+                        mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Nome: $nome',

@@ -31,6 +31,9 @@ class _perfilEstState extends State<perfilEst> {
   String? email;
   String? Contato;
   String? imagemEst;
+  String? contatoInfo;
+  String? nomeInfo;
+  String? fundacao;
 
   @override
   void initState() {
@@ -44,14 +47,8 @@ class _perfilEstState extends State<perfilEst> {
     String? userUid = _auth.currentUser?.uid;
 
     if (userUid != null && mounted) {
-      DocumentSnapshot userData =
+      DocumentSnapshot estabelecimentoData =
           await _firestore.collection('estabelecimentos').doc(userUid).get();
-
-      setState(() {
-        username = userData['username'];
-        email = userData['emailProv'];
-        Contato = userData['Contato'];
-      });
 
       // Verifica se a subcoleção "info" existe
       var infoCollection =
@@ -60,6 +57,20 @@ class _perfilEstState extends State<perfilEst> {
 
       if (infoSnapshot.docs.isNotEmpty) {
         print("sub coleção info existe no documento");
+
+        // Recupera os dados da subcoleção "info" e armazena em uma variável
+        var infoData = infoSnapshot.docs.first.data();
+
+        setState(() {
+          // Armazena os dados na variável ou utilize conforme necessário
+          username = estabelecimentoData['username'];
+          email = estabelecimentoData['emailProv'];
+          Contato = estabelecimentoData['Contato'];
+          imagemEst = infoData['imageEstabelecimento'];
+          contatoInfo = infoData['contato'];
+          fundacao = infoData['fundacao'];
+          nomeInfo = infoData['nome'];
+        });
       } else {
         Navigator.push(
           context,
@@ -227,31 +238,60 @@ class _perfilEstState extends State<perfilEst> {
                     elevation: 5.0,
                     margin: const EdgeInsets.all(16.0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          12.0), // Ajuste o valor conforme necessário
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment
-                            .center, // Alinhe verticalmente ao centro
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          imgEst(), // Componente para exibir a imagem do usuário
-                          const SizedBox(
-                              width:
-                                  16.0), // Espaçamento entre a imagem e os textos
+                          Stack(
+                            children: [
+                              ClipOval(
+                                child: imagemEst != null
+                                    ? Image.network(
+                                        imagemEst!,
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : imgEst(), // Imagem padrão caso "imagemEst" seja nulo
+                              ),
+                              Positioned.fill(
+                                child: Align(
+                                  alignment: Alignment.bottomRight,
+                                  child: Container(
+                                    width: 30.0,
+                                    height: 30.0,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        color: Colors.black,
+                                      ),
+                                      iconSize: 15.0,
+                                      onPressed: () {
+                                        print("editar estabelecimento");
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 16.0),
                           Expanded(
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment
-                                  .center, // Alinhe verticalmente ao centro
+                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Nome: $username',
                                     style: const TextStyle(fontSize: 16)),
                                 Text(
-                                  'Email: ${email != null ? (email!.length > 20 ?
-                                      // ignore: prefer_interpolation_to_compose_strings
-                                      email!.substring(0, 20) + '...' : email) : ''}',
+                                  'Email: ${email != null ? (email!.length > 20 ? email!.substring(0, 20) + '...' : email) : ''}',
                                   style: const TextStyle(fontSize: 16),
                                   overflow: TextOverflow.ellipsis,
                                 ),

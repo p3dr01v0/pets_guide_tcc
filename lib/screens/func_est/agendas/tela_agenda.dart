@@ -18,6 +18,7 @@ class TelaAgenda extends StatefulWidget {
 }
 
 class _TelaAgendaState extends State<TelaAgenda> {
+  List<bool> diasFuncionamento = [];
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
@@ -69,8 +70,7 @@ class _TelaAgendaState extends State<TelaAgenda> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
+      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
       appBar: AppBar(
         title: const Text('Selecionar agenda'),
         backgroundColor: const Color(0xFF10428B),
@@ -85,47 +85,59 @@ class _TelaAgendaState extends State<TelaAgenda> {
                     children: [
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            fixedSize: const Size(150, 30),
-                            backgroundColor:
-                                const Color.fromARGB(255, 255, 149, 0)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          fixedSize: const Size(150, 30),
+                          backgroundColor:
+                              const Color.fromARGB(255, 255, 149, 0),
+                        ),
                         onPressed: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TelaDiasFuncionamento(
-                                      typeService: widget.typeService)));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TelaDiasFuncionamento(
+                                typeService: widget.typeService,
+                              ),
+                            ),
+                          );
                         },
                         child: const Text(
                           'Criar Agenda',
                           style: TextStyle(
-                            fontSize: 14, // Tamanho do texto
-                            color: Colors.white, // Cor do texto
+                            fontSize: 14,
+                            color: Colors.white,
                           ),
                         ),
                       ),
                       OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            textStyle: const TextStyle(
-                                color: Color.fromARGB(255, 255, 149, 0)),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            fixedSize: const Size(150, 30),
+                        style: OutlinedButton.styleFrom(
+                          textStyle: const TextStyle(
+                            color: Color.fromARGB(255, 255, 149, 0),
                           ),
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      TelaSelectHist(typeService: typeService),
-                                ));
-                          },
-                          child: const Text('Histórico',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 255, 149, 0),
-                                fontWeight: FontWeight.bold, // Negrito
-                              ))),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          fixedSize: const Size(150, 30),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TelaSelectHist(
+                                typeService: widget.typeService,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Histórico',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 255, 149, 0),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -151,114 +163,141 @@ class _TelaAgendaState extends State<TelaAgenda> {
 
                         return Card(
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                           elevation: 4.0,
                           margin: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          child: ListTile(
-                            title: Text(nomeAgenda,
-                                style: const TextStyle(fontSize: 20)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  height: 6,
+                            vertical: 8.0,
+                            horizontal: 16.0,
+                          ),
+                          child: Stack(
+                            children: [
+                              ListTile(
+                                title: Text(
+                                  nomeAgenda,
+                                  style: const TextStyle(fontSize: 20),
                                 ),
-                                Text('$firstHorario - $lastHorario'),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                Text(services),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    OutlinedButton(
-                                        style: OutlinedButton.styleFrom(
+                                    const SizedBox(height: 6),
+                                    Text('$firstHorario - $lastHorario'),
+                                    const SizedBox(height: 4),
+                                    Text(services),
+                                    const SizedBox(height: 15),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
                                             textStyle: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Color.fromARGB(
-                                                    255, 255, 149, 0)),
+                                              fontWeight: FontWeight.bold,
+                                              color: Color.fromARGB(
+                                                  255, 255, 149, 0),
+                                            ),
                                             shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        30.0))),
-                                        onPressed: () {
-                                          Navigator.push(
+                                              borderRadius:
+                                                  BorderRadius.circular(30.0),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
                                               context,
                                               widget.typeService != 'hotelPet'
                                                   ? MaterialPageRoute(
                                                       builder: (context) =>
                                                           TelaVerSolicitacoes(
-                                                              typeService:
-                                                                  typeService,
-                                                              nomeAgenda:
-                                                                  nomeAgenda),
+                                                        typeService:
+                                                            widget.typeService,
+                                                        nomeAgenda: nomeAgenda,
+                                                      ),
                                                     )
                                                   : MaterialPageRoute(
                                                       builder: (context) =>
                                                           TelaVerSolicitacoesHotel(
-                                                              typeService:
-                                                                  typeService,
-                                                              nomeAgenda:
-                                                                  nomeAgenda),
-                                                    ));
-                                        },
-                                        child: const Text('Solicitações',
+                                                        typeService:
+                                                            widget.typeService,
+                                                        nomeAgenda: nomeAgenda,
+                                                      ),
+                                                    ),
+                                            );
+                                          },
+                                          child: const Text(
+                                            'Solicitações',
                                             style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Color.fromARGB(
-                                                    255, 255, 149, 0)))),
-                                    OutlinedButton(
-                                        style: OutlinedButton.styleFrom(
-                                            textStyle: const TextStyle(
-                                                fontWeight: FontWeight.bold,
                                                 color: Color.fromARGB(
                                                     255, 255, 149, 0)),
+                                          ),
+                                        ),
+                                        OutlinedButton(
+                                          style: OutlinedButton.styleFrom(
+                                            textStyle: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Color.fromARGB(
+                                                  255, 255, 149, 0),
+                                            ),
                                             shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        30.0))),
-                                        onPressed: () {
-                                          Navigator.push(
+                                              borderRadius:
+                                                  BorderRadius.circular(30.0),
+                                            ),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
                                               context,
-                                              typeService != 'hotelPet'
+                                              widget.typeService != 'hotelPet'
                                                   ? MaterialPageRoute(
                                                       builder: (context) =>
                                                           TelaVerAgenda(
-                                                              typeService:
-                                                                  typeService,
-                                                              nomeAgenda:
-                                                                  nomeAgenda),
+                                                        typeService:
+                                                            widget.typeService,
+                                                        nomeAgenda: nomeAgenda,
+                                                      ),
                                                     )
                                                   : MaterialPageRoute(
                                                       builder: (context) =>
                                                           TelaVerAgendaHotel(
-                                                              typeService:
-                                                                  typeService,
-                                                              nomeAgenda:
-                                                                  nomeAgenda),
-                                                    ));
-                                        },
-                                        child: const Text('Agendamentos',
+                                                        typeService:
+                                                            widget.typeService,
+                                                        nomeAgenda: nomeAgenda,
+                                                      ),
+                                                    ),
+                                            );
+                                          },
+                                          child: const Text(
+                                            'Agendamentos',
                                             style: TextStyle(
-                                                fontWeight: FontWeight.bold,
                                                 color: Color.fromARGB(
-                                                    255, 255, 149, 0)))),
+                                                    255, 255, 149, 0)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 15),
                                   ],
                                 ),
-                                const SizedBox(
-                                  height: 15,
+                              ),
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        // Navega para a tela de edição de dias
+                                      },
+                                      icon: const Icon(Icons.edit),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        // Adicione a lógica para a ação de exclusão aqui
+                                      },
+                                      icon: const Icon(Icons.delete),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            trailing: IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.edit),
-                            ),
+                              ),
+                            ],
                           ),
                         );
                       },
