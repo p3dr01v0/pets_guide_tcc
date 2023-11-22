@@ -28,6 +28,7 @@ class _homeUserState extends State<homeUser> {
   String? nome;
   String? email;
   String? telefone;
+  String? imageUser;
   User? _user;
   int _currentIndex = 0;
 
@@ -73,6 +74,21 @@ class _homeUserState extends State<homeUser> {
     }
   }
 
+  Widget _buildUserImage() {
+    if (imageUser != null && imageUser!.isNotEmpty) {
+      return CircleAvatar(
+        radius: 40,
+        backgroundImage: NetworkImage(imageUser!),
+      );
+    } else {
+      // Se a imagem for nula, exibe uma imagem padrão ou qualquer outra lógica desejada.
+      return const CircleAvatar(
+        radius: 40,
+        backgroundImage: AssetImage('imagens/user.png'),
+      );
+    }
+  }
+
   void loadUserData() async {
     String? userUid = _auth.currentUser?.uid;
 
@@ -84,6 +100,7 @@ class _homeUserState extends State<homeUser> {
         nome = userData['nome'];
         email = userData['email'];
         telefone = userData['telefone'];
+        imageUser = userData['imageUser'];
       });
     }
   }
@@ -166,9 +183,16 @@ class _homeUserState extends State<homeUser> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  imgUser(), // Componente para exibir a imagem do usuário
-                  const SizedBox(height: 15.0),
-                  Text('Nome: $nome'),
+                  _buildUserImage(), // Usando o método para exibir a imagem do usuário
+                  const SizedBox(height: 14.0),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 18.0), // avança o texto para a direita
+                    child: Text(
+                      '$nome',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -202,6 +226,7 @@ class _homeUserState extends State<homeUser> {
             ListTile(
               title: const Text('Deslogar'),
               onTap: () {
+                print("deslogando");
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,

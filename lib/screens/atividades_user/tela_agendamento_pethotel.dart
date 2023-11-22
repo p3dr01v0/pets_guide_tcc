@@ -53,10 +53,12 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
   void initState() {
     super.initState();
     _auth.authStateChanges().listen((user) {
-      setState(() {
-        _user = user;
-      });
-      getDiasFuncionamento();
+      if (mounted) {
+        setState(() {
+          _user = user;
+        });
+        getDiasFuncionamento();
+      }
     });
   }
 

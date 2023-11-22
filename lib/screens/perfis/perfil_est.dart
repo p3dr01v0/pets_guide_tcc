@@ -40,7 +40,9 @@ class _perfilEstState extends State<perfilEst> {
     super.initState();
     // Verifique se há um usuário autenticado quando o widget é iniciado
     _checkCurrentUser();
-    loadEstData();
+    if (mounted) {
+      loadEstData();
+    }
   }
 
   void loadEstData() async {
@@ -56,7 +58,7 @@ class _perfilEstState extends State<perfilEst> {
       var infoSnapshot = await infoCollection.get();
 
       if (infoSnapshot.docs.isNotEmpty) {
-        print("sub coleção info existe no documento");
+        print("Subcoleção info existe no documento");
 
         // Recupera os dados da subcoleção "info" e armazena em uma variável
         var infoData = infoSnapshot.docs.first.data();
@@ -72,11 +74,22 @@ class _perfilEstState extends State<perfilEst> {
           nomeInfo = infoData['nome'];
         });
       } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const telaAddInfo()),
-        );
-        print("sub coleção não existe no documento");
+        // Verifica se o UID está em outra coleção (diferente de "estabelecimentos")
+        var otherCollectionSnapshot =
+            await _firestore.collection('outraColecao').doc(userUid).get();
+
+        if (otherCollectionSnapshot.exists) {
+          print("O UID está em outra coleção");
+
+          // Permanece na tela atual, pois o UID está em outra coleção
+        } else {
+          // UID está na coleção "estabelecimentos" e a subcoleção "info" está vazia
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const telaAddInfo()),
+          );
+          print("Subcoleção não existe no documento");
+        }
       }
     }
   }

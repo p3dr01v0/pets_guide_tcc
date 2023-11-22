@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,39 +49,51 @@ class _TelaFinalizarAgendamentoState
   String teste = '';
   String? selectedPet;
   int duracao = 0;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
     _auth.authStateChanges().listen((user) {
-      setState(() {
-        _user = user;
-      });
+      if (mounted) {
+        setState(() {
+          _user = user;
+        });
+      }
     });
-    duracao = calcularDuracao(widget.dataOfcSaida, widget.dataOfcEntrada);
+    if (mounted) {
+      duracao = calcularDuracao(widget.dataOfcSaida, widget.dataOfcEntrada);
+    }
   }
 
   void _submitAgendamento() async {
-    String uid;
+    if (_isSubmitting) {
+      return;
+    }
 
-    FirebaseFirestore db = FirebaseFirestore.instance;
+    setState(() {
+      _isSubmitting = true;
+    });
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
-      // listener para receber
+    try {
+      User? user = _auth.currentUser;
 
       if (user != null && widget.estabelecimentoId.isNotEmpty) {
         logger.d('ID de user${user.uid}');
-        uid = user.uid;
+        String uid = user.uid;
 
-        final userDoc = await db.collection('user').doc(uid).get();
-        final petDoc =
-            await db.collection('user/$uid/pets').doc(selectedPet).get();
+        final userDoc = await _firestore.collection('user').doc(uid).get();
+        final petDoc = await _firestore
+            .collection('user/$uid/pets')
+            .doc(selectedPet)
+            .get();
 
         String userName = userDoc['nome'];
         String petName = petDoc['nome'];
         String petImage = petDoc['imagePet'];
         String petAge = petDoc['idade'];
         String petRace = petDoc['raca'];
+
         final agendamento = <String, dynamic>{
           "estabelecimentoId": widget.estabelecimentoId,
           "UID": uid,
@@ -103,19 +117,24 @@ class _TelaFinalizarAgendamentoState
           "petRace": petRace
         };
 
-// Add a new document with a generated ID with image
+        // Verifica se o documento já existe antes de adicionar
+        bool agendamentoExists = await _checkAgendamentoExists(uid);
+        if (!agendamentoExists) {
+          DocumentReference doc = await _firestore
+              .collection(
+                  "estabelecimentos/${widget.estabelecimentoId}/${widget.typeService}/${widget.nomeAgenda}/agendamentosHotelPet")
+              .add(agendamento);
 
-        db
-            .collection(
-                "estabelecimentos/${widget.estabelecimentoId}/${widget.typeService}/${widget.nomeAgenda}/agendamentosHotelPet")
-            .add(agendamento)
-            .then((DocumentReference doc) {
-          db
+          await _firestore
               .collection("user/$uid/agendamentosHotelPet")
               .doc(doc.id)
               .set(agendamento);
+
           logger.d('DocumentSnapshot added with ID: ${doc.id}');
-        }).then((_) {
+
+          // Restante do código...
+
+          // Redireciona para a próxima tela
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const homeUser()),
@@ -125,10 +144,31 @@ class _TelaFinalizarAgendamentoState
               MaterialPageRoute(
                 builder: (context) => TelaHistoricoUserHotel(),
               ));
-          // ignore: invalid_return_type_for_catch_error
-        }).catchError((error) => logger.d(error));
+        } else {
+          logger.d('O agendamento já existe para este usuário.');
+          // Adicione aqui a lógica para tratar o caso em que o agendamento já existe
+        }
       }
-    });
+    } catch (error) {
+      logger.d('Erro durante o agendamento: $error');
+      // Adicione aqui a lógica para tratar erros durante o agendamento
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
+  }
+
+  Future<bool> _checkAgendamentoExists(String uid) async {
+    QuerySnapshot result = await _firestore
+        .collection("user/$uid/agendamentosHotelPet")
+        .where("estabelecimentoId", isEqualTo: widget.estabelecimentoId)
+        .where("typeService", isEqualTo: widget.typeService)
+        .where("agenda", isEqualTo: widget.nomeAgenda)
+        .where("status", isEqualTo: 0) // Adicione mais condições se necessário
+        .get();
+
+    return result.docs.isNotEmpty;
   }
 
   int calcularDuracao(DateTime data1, DateTime data2) {

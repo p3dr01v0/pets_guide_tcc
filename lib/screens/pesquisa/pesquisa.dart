@@ -12,7 +12,6 @@ import 'package:flutter_application_1/screens/interface_user/home.dart';
 import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
 import 'package:flutter_application_1/screens/pets/add_pet.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
-import 'package:flutter_application_1/servicos/img_padrao.dart';
 import 'package:flutter_application_1/style/card_pesquisa.dart';
 
 void main() async {
@@ -40,6 +39,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
   String? nome;
   String? email;
   String? telefone;
+  String? imageUser;
 
   int _currentIndex = 0;
 
@@ -81,6 +81,21 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
     }
   }
 
+  Widget _buildUserImage() {
+    if (imageUser != null && imageUser!.isNotEmpty) {
+      return CircleAvatar(
+        radius: 40,
+        backgroundImage: NetworkImage(imageUser!),
+      );
+    } else {
+      // Se a imagem for nula, exibe uma imagem padrão ou qualquer outra lógica desejada.
+      return const CircleAvatar(
+        radius: 40,
+        backgroundImage: AssetImage('imagens/user.png'),
+      );
+    }
+  }
+
   void loadUserData() async {
     String? userUid = _auth.currentUser?.uid;
 
@@ -92,6 +107,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
         nome = userData['nome'];
         email = userData['email'];
         telefone = userData['telefone'];
+        imageUser = userData['imageUser'];
       });
     }
   }
@@ -453,9 +469,16 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  imgUser(), // Componente para exibir a imagem do usuário
-                  const SizedBox(height: 15.0),
-                  Text('Nome: $nome'),
+                  _buildUserImage(), // Usando o método para exibir a imagem do usuário
+                  const SizedBox(height: 14.0),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 18.0), // avança o texto para a direita
+                    child: Text(
+                      '$nome',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -489,6 +512,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
             ListTile(
               title: const Text('Deslogar'),
               onTap: () {
+                print("deslogando");
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,

@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/screens/atividades_user/editar_user.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
@@ -10,7 +12,6 @@ import 'package:flutter_application_1/servicos/auth_svc.dart';
 import '../cad_log/cad_log_user.dart';
 import '../pets/dog.dart';
 import '../pets/cat.dart';
-import '../../servicos/img_padrao.dart';
 import '../pets/add_pet.dart';
 import '../../style/btn_pet.dart';
 
@@ -29,10 +30,10 @@ class _perfilUserState extends State<perfilUser> {
   String? nome;
   String? email;
   String? telefone;
+  String? imageUser;
 
   int _currentIndex = 0;
 
-//logica para trocar as telas na barra de navegação
   void navegar(int index) {
     setState(() {
       _currentIndex = index;
@@ -64,27 +65,61 @@ class _perfilUserState extends State<perfilUser> {
       print("Perfil");
     }
   }
-//fim da logica
 
   @override
   void initState() {
     super.initState();
-    loadUserData();
+    _auth.authStateChanges().listen((User? user) async {
+      if (user != null) {
+        await loadUserData(user.uid);
+      }
+    });
   }
 
-  void loadUserData() async {
-    String? userUid = _auth.currentUser?.uid;
+  Widget _buildUserImage() {
+    if (imageUser != null && imageUser!.isNotEmpty) {
+      return CircleAvatar(
+        radius: 40,
+        backgroundImage: NetworkImage(imageUser!),
+      );
+    } else {
+      return const CircleAvatar(
+        radius: 40,
+        backgroundImage: AssetImage('imagens/user.png'),
+      );
+    }
+  }
 
-    if (userUid != null && mounted) {
-      DocumentSnapshot userData =
-          await _firestore.collection('user').doc(userUid).get();
+  Future<void> loadUserData(String userUid) async {
+    DocumentSnapshot userData =
+        await _firestore.collection('user').doc(userUid).get();
 
+    if (mounted) {
       setState(() {
         nome = userData['nome'];
         email = userData['email'];
         telefone = userData['telefone'];
+        imageUser = userData['imageUser'] ?? '';
       });
     }
+  }
+
+  void editarUser(String userUID, String user, String email, String telefone,
+      String imageUser) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => editarInfoUser(
+          userUID: userUID,
+          user: user,
+          email: email,
+          telefone: telefone,
+          imageUser: imageUser,
+        ),
+      ),
+    );
+
+    loadUserData(userUID);
   }
 
   @override
@@ -105,9 +140,15 @@ class _perfilUserState extends State<perfilUser> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  imgUser(), // Componente para exibir a imagem do usuário
-                  const SizedBox(height: 15.0),
-                  Text('Nome: $nome'),
+                  _buildUserImage(),
+                  const SizedBox(height: 14.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 18.0),
+                    child: Text(
+                      '$nome',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -130,8 +171,18 @@ class _perfilUserState extends State<perfilUser> {
               },
             ),
             ListTile(
+              title: const Text('Histórico'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TelaHistoricoUser()),
+                );
+              },
+            ),
+            ListTile(
               title: const Text('Deslogar'),
               onTap: () {
+                print("deslogando");
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,
@@ -159,25 +210,26 @@ class _perfilUserState extends State<perfilUser> {
                   children: [
                     Stack(
                       children: [
-                        imgUser(), // Componente para exibir a imagem do usuário
+                        _buildUserImage(),
                         Positioned.fill(
                           child: Align(
                             alignment: Alignment.bottomRight,
                             child: Container(
-                              width: 30.0, // Controle da largura do círculo
-                              height: 30.0, // Controle da altura do círculo
+                              width: 30.0,
+                              height: 30.0,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors
-                                    .white, //Cor de fundo do círculo do ícone
+                                color: Colors.white,
                               ),
                               child: IconButton(
                                 icon: const Icon(
                                   Icons.edit,
-                                  color: Colors.black, //Cor do ícone de edição
+                                  color: Colors.black,
                                 ),
-                                iconSize: 15.0, //tamanho do ícone aqui
+                                iconSize: 15.0,
                                 onPressed: () {
+                                  editarUser(_auth.currentUser!.uid, nome!,
+                                      email!, telefone!, imageUser!);
                                   print("editar usuario");
                                 },
                               ),
@@ -192,11 +244,27 @@ class _perfilUserState extends State<perfilUser> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Nome: $nome',
+                          Text('Nome: ${nome ?? ''}',
                               style: const TextStyle(fontSize: 16)),
-                          Text('Email: $email',
-                              style: const TextStyle(fontSize: 16)),
-                          Text('Telefone: $telefone',
+                          RichText(
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            text: TextSpan(
+                              style: const TextStyle(
+                                  fontSize: 16, color: Colors.black),
+                              children: [
+                                const TextSpan(text: 'Email: '),
+                                TextSpan(
+                                  text: email ?? '',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text('Telefone: ${telefone ?? ''}',
                               style: const TextStyle(fontSize: 16)),
                         ],
                       ),
@@ -273,8 +341,6 @@ class _perfilUserState extends State<perfilUser> {
           ],
         ),
       ),
-
-      //barra de navegação inferior
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         height: _isVisible ? 60.0 : 0.0,
@@ -292,10 +358,8 @@ class _perfilUserState extends State<perfilUser> {
           type: BottomNavigationBarType.fixed,
           backgroundColor: const Color.fromARGB(255, 255, 251, 248),
           currentIndex: _currentIndex,
-          unselectedItemColor: const Color.fromARGB(
-              255, 3, 22, 50), // Cor dos itens não selecionados
-          selectedItemColor: const Color(
-              0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
+          unselectedItemColor: const Color.fromARGB(255, 3, 22, 50),
+          selectedItemColor: const Color(0xFF10428B),
           onTap: navegar,
           items: const [
             BottomNavigationBarItem(
