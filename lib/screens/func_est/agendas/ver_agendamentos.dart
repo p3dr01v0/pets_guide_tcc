@@ -99,9 +99,14 @@ class _TelaVerAgendaState extends State<TelaVerAgenda> {
                             itemBuilder: (context, index) {
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
                               final statusNumber = documents[index]['status'];
                               final clientId =
                                   documents[index]['UID'].toString();
@@ -144,11 +149,16 @@ class _TelaVerAgendaState extends State<TelaVerAgenda> {
                                     children: [
                                       const SizedBox(height: 6),
                                       Text('$nomePet de $nomeUser'),
-                                      Text(horario),
                                       const SizedBox(
                                         height: 14,
                                       ),
-                                      Text("$data às $horario"),
+                                      Text(
+                                          "Check-in: $dataEntrada às $horarioEntrada"),
+                                      horarioSaida.isNotEmpty &&
+                                              dataSaida.isNotEmpty
+                                          ? Text(
+                                              "Check-Out: $dataSaida às $horarioSaida")
+                                          : const SizedBox(height: 16),
                                       const SizedBox(height: 16),
                                       Text(showStatus)
                                     ],
@@ -269,7 +279,7 @@ class _TelaVerAgendaState extends State<TelaVerAgenda> {
           }
           try {
             await _firestore
-                .collection('usuario/$userId/agendamentos')
+                .collection('user/$userId/agendamentos')
                 .doc(idAgendamento)
                 .update(upgrade)
                 .then((_) {
@@ -299,7 +309,7 @@ class _TelaVerAgendaState extends State<TelaVerAgenda> {
           }
           try {
             await _firestore
-                .collection('usuario/$userId/agendamentos')
+                .collection('user/$userId/agendamentos')
                 .doc(idAgendamento)
                 .update(upgrade)
                 .then((_) {
@@ -315,7 +325,7 @@ class _TelaVerAgendaState extends State<TelaVerAgenda> {
           logger.i('buceidow $infoId');
 
           int servicosConcluidos = infoDoc[
-              'servicosConcluidos']; //PRECISA CRIAR UM CAMPO servicosConcluidos
+              'servicosConcluidos']; //PRECISA CRIAR UM CAMPO servicosConcluidos NO CARALHO DO info ASS: FELPA
 
           if (infoId.isNotEmpty) {
             try {

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_est.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
+import 'package:flutter_application_1/screens/func_est/interface_est/perfil_est.dart';
+import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:flutter_application_1/servicos/firebase_options.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;

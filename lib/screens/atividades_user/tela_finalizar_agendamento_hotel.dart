@@ -1,9 +1,7 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_hist_user_hotel.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
 import 'package:logger/logger.dart';
 
@@ -49,7 +47,6 @@ class _TelaFinalizarAgendamentoState
   String teste = '';
   String? selectedPet;
   int duracao = 0;
-  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -67,74 +64,98 @@ class _TelaFinalizarAgendamentoState
   }
 
   void _submitAgendamento() async {
-    if (_isSubmitting) {
-      return;
-    }
+    String uid;
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    FirebaseFirestore db = FirebaseFirestore.instance;
 
-    try {
-      User? user = _auth.currentUser;
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      // listener para receber
 
-      if (user != null && widget.estabelecimentoId.isNotEmpty) {
+      if (mounted && user != null && widget.estabelecimentoId.isNotEmpty) {
         logger.d('ID de user${user.uid}');
-        String uid = user.uid;
+        uid = user.uid;
 
-        final userDoc = await _firestore.collection('user').doc(uid).get();
-        final petDoc = await _firestore
-            .collection('user/$uid/pets')
-            .doc(selectedPet)
+        final providerQuery = await db
+            .collection('estabelecimentos/${widget.estabelecimentoId}/info')
             .get();
+
+        final provDocs = providerQuery.docs.first;
+        final userDoc = await db.collection('user').doc(uid).get();
+        final petDoc =
+            await db.collection('user/$uid/pets').doc(selectedPet).get();
 
         String userName = userDoc['nome'];
         String petName = petDoc['nome'];
         String petImage = petDoc['imagePet'];
         String petAge = petDoc['idade'];
         String petRace = petDoc['raca'];
+        String provName = provDocs['nome'];
+        print(provName);
+        var agendamento = <String, dynamic>{};
 
-        final agendamento = <String, dynamic>{
-          "estabelecimentoId": widget.estabelecimentoId,
-          "UID": uid,
-          "isAccept": false,
-          "status": 0,
-          "horarioEntrada": widget.horarioEntrada,
-          "horarioSaida": widget.horarioSaida,
-          "dataEntrada": widget.dataEntrada,
-          "dataSaida": widget.dataSaida,
-          "dataOfcEntrada": widget.dataOfcEntrada,
-          "dataOfcSaida": widget.dataOfcSaida,
-          "dataAgendamento": DateTime.now(),
-          "servico": widget.servico,
-          "petId": selectedPet,
-          "agenda": widget.nomeAgenda,
-          "typeService": widget.typeService,
-          "userName": userName,
-          "petName": petName,
-          "petImage": petImage,
-          "petAge": petAge,
-          "petRace": petRace
-        };
+        if (widget.dataSaida.isEmpty && widget.horarioSaida.isEmpty) {
+          setState(() {
+            agendamento = <String, dynamic>{
+              "estabelecimentoId": widget.estabelecimentoId,
+              "UID": uid,
+              "isAccept": false,
+              "status": 0,
+              "avaliado": false,
+              "horarioEntrada": widget.horarioEntrada,
+              "horarioSaida": '',
+              "dataEntrada": widget.dataEntrada,
+              "dataSaida": '',
+              "dataOfcEntrada": widget.dataOfcEntrada,
+              "dataOfcSaida": '',
+              "dataAgendamento": DateTime.now(),
+              "servico": widget.servico,
+              "petId": selectedPet,
+              "agenda": widget.nomeAgenda,
+              "typeService": widget.typeService,
+              "userName": userName,
+              "petName": petName,
+              "petImage": petImage,
+              "petAge": petAge,
+              "petRace": petRace
+            };
+          });
+        } else {
+          setState(() {
+            agendamento = <String, dynamic>{
+              "estabelecimentoId": widget.estabelecimentoId,
+              "UID": uid,
+              "isAccept": false,
+              "status": 0,
+              "horarioEntrada": widget.horarioEntrada,
+              "horarioSaida": widget.horarioSaida,
+              "dataEntrada": widget.dataEntrada,
+              "dataSaida": widget.dataSaida,
+              "dataOfcEntrada": widget.dataOfcEntrada,
+              "dataOfcSaida": widget.dataOfcSaida,
+              "dataAgendamento": DateTime.now(),
+              "servico": widget.servico,
+              "petId": selectedPet,
+              "agenda": widget.nomeAgenda,
+              "typeService": widget.typeService,
+              "userName": userName,
+              "petName": petName,
+              "petImage": petImage,
+              "petAge": petAge,
+              "petRace": petRace
+            };
+          });
+        }
 
-        // Verifica se o documento já existe antes de adicionar
-        bool agendamentoExists = await _checkAgendamentoExists(uid);
-        if (!agendamentoExists) {
-          DocumentReference doc = await _firestore
-              .collection(
-                  "estabelecimentos/${widget.estabelecimentoId}/${widget.typeService}/${widget.nomeAgenda}/agendamentosHotelPet")
-              .add(agendamento);
+// Add a new document with a generated ID with image
 
-          await _firestore
-              .collection("user/$uid/agendamentosHotelPet")
-              .doc(doc.id)
-              .set(agendamento);
-
+        db
+            .collection(
+                "estabelecimentos/${widget.estabelecimentoId}/${widget.typeService}/${widget.nomeAgenda}/agendamentos")
+            .add(agendamento)
+            .then((DocumentReference doc) {
+          db.collection("user/$uid/agendamentos").doc(doc.id).set(agendamento);
           logger.d('DocumentSnapshot added with ID: ${doc.id}');
-
-          // Restante do código...
-
-          // Redireciona para a próxima tela
+        }).then((_) {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const homeUser()),
@@ -142,33 +163,12 @@ class _TelaFinalizarAgendamentoState
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => TelaHistoricoUserHotel(),
+                builder: (context) => TelaHistoricoUser(),
               ));
-        } else {
-          logger.d('O agendamento já existe para este usuário.');
-          // Adicione aqui a lógica para tratar o caso em que o agendamento já existe
-        }
+          // ignore: invalid_return_type_for_catch_error
+        }).catchError((error) => logger.d(error));
       }
-    } catch (error) {
-      logger.d('Erro durante o agendamento: $error');
-      // Adicione aqui a lógica para tratar erros durante o agendamento
-    } finally {
-      setState(() {
-        _isSubmitting = false;
-      });
-    }
-  }
-
-  Future<bool> _checkAgendamentoExists(String uid) async {
-    QuerySnapshot result = await _firestore
-        .collection("user/$uid/agendamentosHotelPet")
-        .where("estabelecimentoId", isEqualTo: widget.estabelecimentoId)
-        .where("typeService", isEqualTo: widget.typeService)
-        .where("agenda", isEqualTo: widget.nomeAgenda)
-        .where("status", isEqualTo: 0) // Adicione mais condições se necessário
-        .get();
-
-    return result.docs.isNotEmpty;
+    });
   }
 
   int calcularDuracao(DateTime data1, DateTime data2) {
@@ -191,93 +191,117 @@ class _TelaFinalizarAgendamentoState
               child: _user != null
                   ? Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 70),
-                          const Text(
-                            "Última checagem de condições \nantes de agendar",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 20),
-                            maxLines: 3,
+                          const SizedBox(
+                            height: 60,
                           ),
-                          const SizedBox(height: 30),
-                          DefaultTextStyle.merge(
-                            style: const TextStyle(fontSize: 15),
+                          Container(
+                            margin: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(24),
+                            color: Colors.white,
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(widget.servico),
-                                Text(
-                                    "check-In: ${widget.dataEntrada} às ${widget.horarioEntrada}"),
-                                Text(
-                                    "check_Out: ${widget.dataSaida} às ${widget.horarioSaida}"),
-                                const SizedBox(
-                                  height: 32,
+                                const SizedBox(height: 48),
+                                const Text(
+                                  "Última checagem de condições \nantes de agendar",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 20),
+                                  maxLines: 3,
                                 ),
-                                Text(
-                                  "valor Final: ${widget.preco} x $duracao",
-                                  style: const TextStyle(fontSize: 18),
+                                const SizedBox(height: 30),
+                                DefaultTextStyle.merge(
+                                  style: const TextStyle(fontSize: 15),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        widget.servico,
+                                        style: const TextStyle(fontSize: 16),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                          "check-In: ${widget.dataEntrada} às ${widget.horarioEntrada}"),
+                                      if (widget.dataSaida.isNotEmpty &&
+                                          widget.horarioSaida.isNotEmpty)
+                                        Text(
+                                            "check_Out: ${widget.dataSaida} às ${widget.horarioSaida}")
+                                      else
+                                        const SizedBox(
+                                          height: 14,
+                                        ),
+                                      const SizedBox(
+                                        height: 32,
+                                      ),
+                                      if (duracao != 0)
+                                        Text(
+                                          "valor Final: ${widget.preco} x $duracao",
+                                          style: const TextStyle(fontSize: 18),
+                                        )
+                                      else
+                                        Text('Valor Final: ${widget.preco}',
+                                            style:
+                                                const TextStyle(fontSize: 18)),
+                                      const SizedBox(
+                                        height: 15,
+                                      )
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(
-                                  height: 15,
-                                )
+                                StreamBuilder<QuerySnapshot>(
+                                  stream: _firestore
+                                      .collection('user/${_user!.uid}/pets')
+                                      .snapshots(), // Stream dos horários disponíveis
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const CircularProgressIndicator();
+                                    } else if (snapshot.hasError) {
+                                      return Text('Erro: ${snapshot.error}');
+                                    } else if (!snapshot.hasData) {
+                                      return const Text(
+                                          'Nenhum dado encontrado.');
+                                    } else {
+                                      final pets = snapshot.data!.docs;
+
+                                      List<DropdownMenuItem<String>>
+                                          dropdownItems = [];
+                                      for (var pet in pets) {
+                                        final petData =
+                                            pet.data() as Map<String, dynamic>;
+                                        final id = pet.id;
+                                        final petName =
+                                            petData['nome'] as String;
+
+                                        dropdownItems.add(
+                                          DropdownMenuItem(
+                                            value: id,
+                                            child: Text(petName),
+                                          ),
+                                        );
+                                      }
+
+                                      return DropdownButton(
+                                          value: selectedPet,
+                                          items: dropdownItems,
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              selectedPet = newValue;
+                                            });
+                                          });
+                                    }
+                                  },
+                                ),
+                                const SizedBox(height: 12),
                               ],
                             ),
                           ),
-                          StreamBuilder<QuerySnapshot>(
-                            stream: _firestore
-                                .collection('user/${_user!.uid}/pets')
-                                .snapshots(), // Stream dos horários disponíveis
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text('Erro: ${snapshot.error}');
-                              } else if (!snapshot.hasData) {
-                                return const Text('Nenhum dado encontrado.');
-                              } else {
-                                final pets = snapshot.data!.docs;
-
-                                List<DropdownMenuItem<String>> dropdownItems =
-                                    [];
-                                for (var pet in pets) {
-                                  final petData =
-                                      pet.data() as Map<String, dynamic>;
-                                  final id = pet.id;
-                                  final petName = petData['nome'] as String;
-
-                                  dropdownItems.add(
-                                    DropdownMenuItem(
-                                      value: id,
-                                      child: Text(petName),
-                                    ),
-                                  );
-                                }
-
-                                return DropdownButton(
-                                    value: selectedPet,
-                                    items: dropdownItems,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        selectedPet = newValue;
-                                      });
-                                    });
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 12),
                           FilledButton(
-                            onPressed: _submitAgendamento,
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all<Color>(Colors.blue),
-                              fixedSize: MaterialStateProperty.all<Size>(
-                                  const Size(250.0, 40.0)),
-                            ),
-                            child: const Text('Finalizar',
-                                style: TextStyle(color: Colors.white)),
-                          )
+                              onPressed: _submitAgendamento,
+                              style: const ButtonStyle(
+                                  fixedSize: MaterialStatePropertyAll(
+                                      Size(250.0, 40.0))),
+                              child: const Text('Concluir'))
                         ],
                       ),
                     )

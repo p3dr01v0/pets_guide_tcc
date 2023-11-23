@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
+import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../style/sty_alt.dart';
 import '../../style/btn_cadastro.dart';

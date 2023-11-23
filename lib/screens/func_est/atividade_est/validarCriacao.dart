@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_info_est.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_est.dart';
+import 'package:flutter_application_1/screens/func_est/interface_est/perfil_est.dart';
 
 class ValidarCriacao extends StatefulWidget {
   @override

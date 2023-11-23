@@ -7,6 +7,7 @@ import 'package:flutter_application_1/screens/atividades_user/ver_avaliacoes.dar
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_info_est.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_serv_est.dart';
+import 'package:flutter_application_1/screens/func_est/atividade_est/tela_config_est.dart';
 import 'package:flutter_application_1/screens/func_est/interface_est/telaBanhoETosa.dart';
 import 'package:flutter_application_1/screens/func_est/interface_est/telaHotelPet.dart';
 import 'package:flutter_application_1/screens/func_est/interface_est/telaVeterianrio.dart';
@@ -49,47 +50,45 @@ class _perfilEstState extends State<perfilEst> {
     String? userUid = _auth.currentUser?.uid;
 
     if (userUid != null && mounted) {
-      DocumentSnapshot estabelecimentoData =
+      // Verifica se o UID está na coleção "estabelecimentos"
+      var estabelecimentoDoc =
           await _firestore.collection('estabelecimentos').doc(userUid).get();
 
-      // Verifica se a subcoleção "info" existe
-      var infoCollection =
-          _firestore.collection('estabelecimentos/$userUid/info');
-      var infoSnapshot = await infoCollection.get();
+      if (estabelecimentoDoc.exists) {
+        DocumentSnapshot estabelecimentoData = estabelecimentoDoc;
 
-      if (infoSnapshot.docs.isNotEmpty) {
-        print("Subcoleção info existe no documento");
+        // Verifica se a subcoleção "info" existe
+        var infoCollection =
+            _firestore.collection('estabelecimentos/$userUid/info');
+        var infoSnapshot = await infoCollection.get();
 
-        // Recupera os dados da subcoleção "info" e armazena em uma variável
-        var infoData = infoSnapshot.docs.first.data();
+        if (infoSnapshot.docs.isNotEmpty) {
+          print("Subcoleção info existe no documento");
 
-        setState(() {
-          // Armazena os dados na variável ou utilize conforme necessário
-          username = estabelecimentoData['username'];
-          email = estabelecimentoData['emailProv'];
-          Contato = estabelecimentoData['Contato'];
-          imagemEst = infoData['imageEstabelecimento'];
-          contatoInfo = infoData['contato'];
-          fundacao = infoData['fundacao'];
-          nomeInfo = infoData['nome'];
-        });
-      } else {
-        // Verifica se o UID está em outra coleção (diferente de "estabelecimentos")
-        var otherCollectionSnapshot =
-            await _firestore.collection('outraColecao').doc(userUid).get();
+          // Recupera os dados da subcoleção "info" e armazena em uma variável
+          var infoData = infoSnapshot.docs.first.data();
 
-        if (otherCollectionSnapshot.exists) {
-          print("O UID está em outra coleção");
-
-          // Permanece na tela atual, pois o UID está em outra coleção
+          setState(() {
+            // Armazena os dados na variável ou utilize conforme necessário
+            username = estabelecimentoData['username'];
+            email = estabelecimentoData['emailProv'];
+            Contato = estabelecimentoData['Contato'];
+            imagemEst = infoData['imageEstabelecimento'];
+            contatoInfo = infoData['contato'];
+            fundacao = infoData['fundacao'];
+            nomeInfo = infoData['nome'];
+          });
         } else {
-          // UID está na coleção "estabelecimentos" e a subcoleção "info" está vazia
+          // Subcoleção "info" está vazia
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const telaAddInfo()),
           );
           print("Subcoleção não existe no documento");
         }
+      } else {
+        // UID não está na coleção "estabelecimentos"
+        print("O UID não está na coleção de estabelecimentos");
       }
     }
   }
@@ -238,6 +237,17 @@ class _perfilEstState extends State<perfilEst> {
                   MaterialPageRoute(
                       builder: (context) => const AutentiacacaoTela()),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Configurações"),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TelaConfiguracoesEstabelecimento()));
               },
             ),
           ],

@@ -56,9 +56,8 @@ class _TelaHistoricoHotelState extends State<TelaHistoricoHotel> {
     uid = _user!.uid;
     return _firestore
         .collection(
-            'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
-        .where("isAccept", isEqualTo: true)
-        .where("status", isEqualTo: 4)
+            'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
+        .where("status", isGreaterThan: 3)
         .snapshots();
   }
 
@@ -128,6 +127,9 @@ class _TelaHistoricoHotelState extends State<TelaHistoricoHotel> {
                                   break;
                                 case 4:
                                   showStatus = 'Finalizado';
+                                  break;
+                                case 5:
+                                  showStatus = 'Cancelado';
                                   break;
                                 default:
                                   showStatus = '';

@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
+import 'package:flutter_application_1/screens/atividades_user/ver_avaliacoes.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:logger/logger.dart';
 
+var logger = Logger();
 
 class TelaAvaliacao extends StatefulWidget {
   final String estabelecimentoId;
@@ -44,18 +46,22 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
           final docUser = await db.collection('user').doc(uid).get();
           final String nomeUser = docUser['nome'];
           final imageUser = docUser['imageUser'];
-          if (widget.agendamentoId.isEmpty || widget.agendamentoId.isEmpty) {
+          if (widget.agendamentoId.isEmpty ||
+              widget.estabelecimentoId.isEmpty) {
             print(
                 'Algum dos ID está faltando: Agendamento(${widget.agendamentoId}) ou Estabelecimento(${widget.estabelecimentoId})');
           } else {
+            print('prosseguindo na função');
             final docAgendamento = await db
                 .collection('user/$uid/agendamentos')
                 .doc(widget.agendamentoId)
                 .get();
-            final datetime = docAgendamento['data'];
+            final datetimeEnt = docAgendamento['dataEntrada'];
+            final horarioEnt = docAgendamento['horarioEntrada'];
+            final datetimeSaida = docAgendamento['dataSaida'];
+            final horarioSaida = docAgendamento['horarioSaida'];
             final agenda = docAgendamento['agenda'];
             final servico = docAgendamento['servico'];
-            final horario = docAgendamento['horario'];
             final dateUtc = ['dataAgendamento'];
 
             final avaliacao = <String, dynamic>{
@@ -67,9 +73,11 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
               'nota': rating,
               'dataAvaliacao': DateTime.now(),
               'servico': servico,
-              'data': datetime,
+              'dataEntrada': datetimeEnt,
+              'horarioEntrada': horarioEnt,
+              'dataSaida': datetimeSaida,
+              'horarioSaida': horarioSaida,
               'agenda': agenda,
-              'horario': horario,
               'dataUtc': dateUtc,
               'imageUser': imageUser
             };
@@ -87,9 +95,9 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
                 .then((_) async {
                   logger.d('entrou na função');
                   final infoCol = await db
-                  .collection(
-                    'estabelecimentos/${widget.estabelecimentoId}/info')
-                  .get();
+                      .collection(
+                          'estabelecimentos/${widget.estabelecimentoId}/info')
+                      .get();
                   final infoDoc = infoCol.docs.first;
                   final infoId = infoDoc.id;
 
@@ -133,12 +141,16 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
                       .doc(infoId)
                       .update({"notaMedia": notaMedia});
                 })
-                // ignore: invalid_return_type_for_catch_error
+                // ignore: invalid_return_type_for_catch_error, avoid_print
                 .catchError((error) => print(error))
                 .then((_) {
-                  Navigator.of(context)
-                    ..pop()
-                    ..pop();
+                  Navigator.of(context).pop;
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TelaVerAvaliacoes(
+                            estabelecimentoId: widget.estabelecimentoId),
+                      ));
                 });
           }
         }
@@ -146,18 +158,15 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
     }
   }
 
-  String selectedOption1 = 'Cachorro'; // Opção padrão selecionada
-
-  List<String> options1 = ['Cachorro', 'Gato'];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
+      backgroundColor:
+          const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        backgroundColor: const Color(0xFF10428B),
         leading: null,
-        title: const Text('Adicionar pet'),
+        title: const Text('Avaliando Serviço'),
+        backgroundColor: const Color(0xFF10428B),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -165,6 +174,9 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
           key: _formKey,
           child: Column(
             children: <Widget>[
+              Text(
+                  '''${widget.agendamentoId}
+              ${widget.estabelecimentoId}'''),
               const SizedBox(height: 35),
               RatingBar(
                 initialRating: 3, // Classificação inicial

@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
@@ -60,10 +58,11 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
+      backgroundColor:
+          const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
+        title: Text('Avaliações'),
         backgroundColor: const Color(0xFF10428B),
-        title: const Text('Avaliacoes'),
       ),
       body: Center(
         child: _user != null
@@ -95,18 +94,25 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                   documents[index]['conteudo'];
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
                               final nomeUser =
                                   documents[index]['nomeUser'].toString();
                               final nota = documents[index]['nota'];
                               final String imageUser =
                                   documents[index]['imageUser'].toString();
 
+                              // ignore: unused_local_variable
                               final idAvaliacao = documents[index]
                                   .id; // Use .id para obter o ID do documento
 
+                              final num showNota = nota;
                               return Card(
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15)),
@@ -121,7 +127,7 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                       Text(nomeUser),
                                       RatingBarIndicator(
                                         itemSize: 18,
-                                        rating: nota,
+                                        rating: showNota.toDouble(),
                                         itemBuilder: (context, index) =>
                                             const Icon(
                                           Icons.star_rounded,
@@ -132,10 +138,14 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                   ),
                                   leading: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       imageUser.isEmpty
-                                          ? const Icon(Icons.person, size: 36,)
+                                          ? const Icon(
+                                              Icons.person,
+                                              size: 36,
+                                            )
                                           : ClipRRect(
                                               borderRadius:
                                                   BorderRadius.circular(90),
@@ -152,7 +162,15 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 6),
-                                      Text('$data às $horario'),
+                                      Text(servico),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                          'Check-In: $dataEntrada às $horarioEntrada'),
+                                      dataSaida.isNotEmpty &&
+                                              horarioSaida.isNotEmpty
+                                          ? Text(
+                                              'Check-Out: $dataSaida às $horarioSaida')
+                                          : const SizedBox(height: 24),
                                       const SizedBox(height: 18),
                                       if (comentario.isEmpty)
                                         const SizedBox(height: 28)

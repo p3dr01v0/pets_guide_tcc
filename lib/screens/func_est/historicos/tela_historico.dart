@@ -57,16 +57,18 @@ class _TelaHistoricoState extends State<TelaHistorico> {
     return _firestore
         .collection(
             'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
-        .where("isAccept", isEqualTo: true)
-        .where("status", isEqualTo: 4)
+        .where("status", isGreaterThan: 3)
         .snapshots();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
         title: Text('Historico: ${widget.nomeAgenda}'),
+        backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
         child: _user != null
@@ -96,9 +98,10 @@ class _TelaHistoricoState extends State<TelaHistorico> {
                             itemBuilder: (context, index) {
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
                               final nomePet =
                                   documents[index]['petName'].toString();
                               final nomeUser =
@@ -121,6 +124,9 @@ class _TelaHistoricoState extends State<TelaHistorico> {
                                 case 4:
                                   showStatus = 'Finalizado';
                                   break;
+                                case 5:
+                                  showStatus = 'Cancelado';
+                                  break;
                                 default:
                                   showStatus = '';
                               }
@@ -142,11 +148,11 @@ class _TelaHistoricoState extends State<TelaHistorico> {
                                     children: [
                                       const SizedBox(height: 6),
                                       Text('$nomePet de $nomeUser'),
-                                      Text(horario),
+                                      Text(horarioEntrada),
                                       const SizedBox(
                                         height: 14,
                                       ),
-                                      Text("$data às $horario"),
+                                      Text("$dataEntrada às $horarioEntrada"),
                                       const SizedBox(height: 16),
                                       Text(showStatus)
                                     ],

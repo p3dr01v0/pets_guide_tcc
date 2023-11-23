@@ -9,7 +9,7 @@ import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dar
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
+import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:flutter_application_1/screens/pets/add_pet.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import 'package:flutter_application_1/style/card_pesquisa.dart';

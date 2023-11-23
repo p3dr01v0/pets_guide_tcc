@@ -66,7 +66,7 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
       backgroundColor:
           const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        title: Text('Solicitações: ${widget.nomeAgenda}'),
+        title: Text('Solicitações Hotel: ${widget.nomeAgenda}'),
         backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
@@ -80,7 +80,7 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
+                            return CircularProgressIndicator();
                           }
 
                           if (snapshot.hasError) {
@@ -88,7 +88,7 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
                           }
 
                           if (!snapshot.hasData) {
-                            return const Text('Nenhum dado disponível.');
+                            return Text('Nenhum dado disponível.');
                           }
 
                           final documents = snapshot.data!.docs;
@@ -97,15 +97,22 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
                             itemBuilder: (context, index) {
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
                               final nomePet =
                                   documents[index]['petName'].toString();
                               final nomeUser =
                                   documents[index]['userName'].toString();
                               final petImage =
                                   documents[index]['petImage'].toString();
+                              final petRace =
+                                  documents[index]['petRace'].toString();
 
                               final idAgendamento = documents[index]
                                   .id; // Use .id para obter o ID do documento
@@ -130,11 +137,25 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
                                           height: 6,
                                         ),
                                         Text('$nomePet de $nomeUser'),
-                                        Text(horario),
                                         const SizedBox(
-                                          height: 14,
+                                          height: 8,
                                         ),
-                                        Text("$data às $horario"),
+                                        Text(petRace),
+                                        const SizedBox(
+                                          height: 8,
+                                        ),
+                                        Text('''
+Check-In: $dataEntrada
+ às $horarioEntrada'''),
+                                        const SizedBox(
+                                          height: 4,
+                                        ),
+                                        Text('''
+Check-Out: $dataSaida
+ às $horarioSaida'''),
+                                        SizedBox(
+                                          height: 16,
+                                        )
                                       ],
                                     ),
                                     leading: Column(
@@ -165,24 +186,40 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
                                               ),
                                       ],
                                     ),
-                                    trailing: IconButton(
-                                        onPressed: () {
-                                          updateAcceptStatus(
-                                              idAgendamento, clientId);
-                                          logger.d(isAccept);
-                                          Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      TelaVerSolicitacoesHotel(
-                                                          typeService: widget
-                                                              .typeService,
-                                                          nomeAgenda: widget
-                                                              .nomeAgenda)));
-                                        },
-                                        icon: isAccept == true
-                                            ? const Icon(Icons.thumb_up)
-                                            : const Icon(Icons.thumb_down))),
+                                    trailing: SizedBox(
+                                      height: 96,
+                                      width: 96,
+                                      child: Row(
+                                        children: [
+                                          IconButton(
+                                              onPressed: () {
+                                                updateAcceptStatus(
+                                                    idAgendamento, clientId);
+                                                logger.d(isAccept);
+                                                Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            TelaVerSolicitacoesHotel(
+                                                                typeService: widget
+                                                                    .typeService,
+                                                                nomeAgenda: widget
+                                                                    .nomeAgenda)));
+                                              },
+                                              icon: Icon(Icons.check_rounded)),
+                                          IconButton(
+                                              onPressed: () {
+                                                _showConfirmdecline(
+                                                    idAgendamento,
+                                                    context,
+                                                    clientId);
+                                                logger.d(isAccept);
+                                              },
+                                              icon:
+                                                  Icon(Icons.cancel_outlined)),
+                                        ],
+                                      ),
+                                    )),
                               );
                             },
                           );
@@ -240,5 +277,82 @@ class _TelaVerSolicitacoesHotelState extends State<TelaVerSolicitacoesHotel> {
         }
       }
     }
+  }
+
+  Future<void> declineAcceptStatus(String idAgendamento, String userId) async {
+    if (_user != null) {
+      uid = _user!.uid;
+
+      typeService = widget.typeService;
+      nomeAgenda = widget.nomeAgenda;
+
+      // ignore: unused_local_variable
+      final agendamentoDoc = await _firestore
+          .collection(
+              'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
+          .doc(idAgendamento)
+          .get();
+
+      if (idAgendamento.isNotEmpty || userId.isNotEmpty) {
+        final declineAccept = <String, dynamic>{
+          "dataRejeicao": DateTime.now(),
+          "status": 5
+        };
+        try {
+          await _firestore
+              .collection(
+                  'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
+              .doc(idAgendamento)
+              .update(declineAccept)
+              .then((_) {
+            logger.d('update realizado com sucesso');
+          });
+        } on FirebaseException catch (e) {
+          logger.e(e);
+        }
+        try {
+          await _firestore
+              .collection('user/$userId/agendamentos')
+              .doc(idAgendamento)
+              .update(declineAccept)
+              .then((_) {
+            logger.d('update realizado com sucesso');
+          });
+        } on FirebaseException catch (e) {
+          logger.e(e);
+        }
+      }
+    }
+  }
+
+  void _showConfirmdecline(
+      String idAgendamento, BuildContext context, String userId) {
+    //confirmar ações de usuário, medida para anti miss-click
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirmação'),
+          content: const Text(
+              'Tem Certeza que irá rejeitar esse agendamento? Essa ação é irreversível'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                declineAcceptStatus(idAgendamento, userId);
+                Navigator.of(context).pop();
+              },
+              child: Text('Confirmar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Feche o diálogo
+              },
+              child: Text('Cancelar'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

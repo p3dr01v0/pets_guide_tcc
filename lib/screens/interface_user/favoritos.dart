@@ -1,15 +1,10 @@
-// ignore_for_file: body_might_complete_normally_nullable, unused_field
+// ignore_for_file: unused_field, body_might_complete_normally_nullable
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
-import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
-import 'package:flutter_application_1/screens/pets/add_pet.dart';
-import 'package:flutter_application_1/servicos/auth_svc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:logger/logger.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 var logger = Logger();
@@ -27,11 +22,6 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
   User? _user;
   List<Map<String, dynamic>> _providers = [];
 
-  String? nome;
-  String? email;
-  String? telefone;
-  String? imageUser;
-
   @override
   void initState() {
     super.initState();
@@ -48,37 +38,6 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       });
 
       // Consulta os pets do usuário com base no UID
-    }
-  }
-
-  Widget _buildUserImage() {
-    if (imageUser != null && imageUser!.isNotEmpty) {
-      return CircleAvatar(
-        radius: 40,
-        backgroundImage: NetworkImage(imageUser!),
-      );
-    } else {
-      // Se a imagem for nula, exibe uma imagem padrão ou qualquer outra lógica desejada.
-      return const CircleAvatar(
-        radius: 40,
-        backgroundImage: AssetImage('imagens/user.png'),
-      );
-    }
-  }
-
-  void loadUserData() async {
-    String? userUid = _auth.currentUser?.uid;
-
-    if (userUid != null && mounted) {
-      DocumentSnapshot userData =
-          await _firestore.collection('user').doc(userUid).get();
-
-      setState(() {
-        nome = userData['nome'];
-        email = userData['email'];
-        telefone = userData['telefone'];
-        imageUser = userData['imageUser'];
-      });
     }
   }
 
@@ -186,72 +145,6 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
         title: const Text('Meus Favoritos'),
         backgroundColor: const Color(0xFF10428B),
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 34, 96, 190),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildUserImage(), // Usando o método para exibir a imagem do usuário
-                  const SizedBox(height: 14.0),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                        left: 18.0), // avança o texto para a direita
-                    child: Text(
-                      '$nome',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              title: const Text('Add pet'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Perfil'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const perfilUser()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Histórico'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TelaHistoricoUser()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Deslogar'),
-              onTap: () {
-                print("deslogando");
-                autenticacaoServico().deslogar();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AutentiacacaoTela()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
       body: Center(
         child: FutureBuilder<Stream<QuerySnapshot<Map<String, dynamic>>>?>(
             future: _getEstabelecimentoStream(_user!.uid),
@@ -337,7 +230,8 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    doc['imageEstabelecimento'] == null
+                                    doc['imageEstabelecimento'] == null ||
+                                            doc['imageEstabelecimento'] == ''
                                         ? const Icon(
                                             Icons.store,
                                             size: 36,

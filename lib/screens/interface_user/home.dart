@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
+import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import '../cad_log/cad_log_user.dart';

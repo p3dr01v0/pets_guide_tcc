@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
-import 'package:flutter_application_1/screens/perfis/perfil_user.dart';
+import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
 import 'package:flutter_application_1/screens/pets/add_pet.dart';
 import 'package:flutter_application_1/screens/pets/alterar_cat.dart';

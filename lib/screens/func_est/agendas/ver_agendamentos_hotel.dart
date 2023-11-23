@@ -56,7 +56,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
     uid = _user!.uid;
     return _firestore
         .collection(
-            'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+            'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
         .where("isAccept", isEqualTo: true)
         .where("status", isNotEqualTo: 4)
         .snapshots();
@@ -247,7 +247,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
 
       final agendamentoDoc = await _firestore
           .collection(
-              'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+              'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
           .doc(idAgendamento)
           .get();
 
@@ -268,7 +268,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
           try {
             await _firestore
                 .collection(
-                    'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+                    'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
                 .doc(idAgendamento)
                 .update(upgrade)
                 .then((_) {
@@ -279,7 +279,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
           }
           try {
             await _firestore
-                .collection('user/$userId/agendamentosHotelPet')
+                .collection('user/$userId/agendamentos')
                 .doc(idAgendamento)
                 .update(upgrade)
                 .then((_) {
@@ -298,7 +298,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
           try {
             await _firestore
                 .collection(
-                    'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+                    'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
                 .doc(idAgendamento)
                 .update(upgrade)
                 .then((_) {
@@ -309,7 +309,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
           }
           try {
             await _firestore
-                .collection('user/$userId/agendamentosHotelPet')
+                .collection('user/$userId/agendamentos')
                 .doc(idAgendamento)
                 .update(upgrade)
                 .then((_) {
@@ -325,7 +325,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
           logger.i('buceidow $infoId');
 
           int servicosConcluidos = infoDoc[
-              'servicosConcluidos']; //PRECISA CRIAR UM CAMPO servicosConcluidos
+              'servicosConcluidos']; //PRECISA CRIAR UM CAMPO servicosConcluidos NO CARALHO DO info ASS: FELPA
 
           if (infoId.isNotEmpty) {
             try {
@@ -354,7 +354,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
 
       final agendamentoDoc = await _firestore
           .collection(
-              'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+              'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
           .doc(idAgendamento)
           .get();
 
@@ -374,7 +374,7 @@ class _TelaVerAgendaHotelState extends State<TelaVerAgendaHotel> {
         try {
           await _firestore
               .collection(
-                  'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentosHotelPet')
+                  'estabelecimentos/$uid/$typeService/$nomeAgenda/agendamentos')
               .doc(idAgendamento)
               .update(downgrade)
               .then((_) {

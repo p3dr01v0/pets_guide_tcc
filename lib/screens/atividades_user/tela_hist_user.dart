@@ -2,7 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_hist_user_hotel.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_avaliacao.dart';
+import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
 import 'package:logger/logger.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -93,15 +94,6 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
             ? Column(
                 children: [
                   const SizedBox(height: 30),
-                  OutlinedButton(
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TelaHistoricoUserHotel(),
-                            ));
-                      },
-                      child: const Text('Agendamentos De Hotel Pet')),
                   const SizedBox(height: 30),
                   Expanded(
                     child: StreamBuilder<QuerySnapshot>(
@@ -129,29 +121,57 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
 
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
                               final statusNumber = documents[index]['status'];
+                              final bool avaliacaoDisp =
+                                  !documents[index]['avaliado'];
                               final petId = documents[index]['petId'];
                               final userId = documents[index]['UID'];
+                              final provId = documents[index]
+                                      ['estabelecimentoId']
+                                  .toString();
+                              final agendamentoId = documents[index].id;
                               String showStatus = '';
+                              Color cor = Colors.grey;
+                              IconData icone = Icons.circle_outlined;
+
                               switch (statusNumber) {
                                 case 0:
+                                  icone = Icons.circle_outlined;
+                                  cor = Colors.grey;
                                   showStatus = 'Aguardando Resposta';
                                 case 1:
+                                  icone = Icons.circle;
+                                  cor = Colors.lightBlue;
                                   showStatus = 'Aguardando Check-In';
                                   break;
                                 case 2:
+                                  icone = Icons.circle;
+                                  cor = Colors.orange;
                                   showStatus = 'Em Andamento';
                                   break;
                                 case 3:
+                                  icone = Icons.circle;
+                                  cor = Colors.green;
                                   showStatus =
                                       'Concluído, Aguardando Check-Out';
                                   break;
                                 case 4:
+                                  icone = Icons.check_circle;
+                                  cor = Colors.grey;
                                   showStatus = 'Finalizado';
                                   break;
+                                case 5:
+                                  icone = Icons.remove_circle_rounded;
+                                  cor = const Color.fromARGB(255, 221, 55, 43);
+                                  showStatus = 'Cancelado pelo estabelecimento';
                                 default:
                                   showStatus =
                                       'Não foi possível identificar o estado de agendamento';
@@ -172,14 +192,61 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 6),
-                                      Text(data),
+                                      Text(
+                                          'Check-In: $dataEntrada às $horarioEntrada'),
                                       const SizedBox(height: 2),
-                                      Text(horario),
+                                      if (horarioSaida.isNotEmpty &&
+                                          dataSaida.isNotEmpty)
+                                        Text(
+                                            'Check-Out: $dataSaida às $horarioSaida')
+                                      else
+                                        const SizedBox(
+                                          height: 14,
+                                        ),
                                       const SizedBox(height: 14),
                                       const SizedBox(height: 16),
-                                      Text(showStatus)
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(showStatus),
+                                          Icon(
+                                            size: 18,
+                                            icone,
+                                            color: cor,
+                                          )
+                                        ],
+                                      )
                                     ],
                                   ),
+                                  trailing: statusNumber == 4 && avaliacaoDisp
+                                      ? IconButton(
+                                          splashRadius: 30,
+                                          icon: const Icon(
+                                              Icons.rate_review_rounded),
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      TelaAvaliacao(
+                                                          estabelecimentoId:
+                                                              provId,
+                                                          agendamentoId:
+                                                              agendamentoId),
+                                                ));
+                                          })
+                                      : const SizedBox(
+                                          height: 48,
+                                          width: 48,
+                                        ),
+                                  onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            TelaEstabelecimento(
+                                                estabelecimentoId: provId),
+                                      )),
                                 ),
                               );
                             },

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_1/screens/atividades_user/editar_user.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_config.dart';
 import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
@@ -189,6 +190,14 @@ class _perfilUserState extends State<perfilUser> {
                   MaterialPageRoute(
                       builder: (context) => const AutentiacacaoTela()),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Configurações"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaConfig()));
               },
             ),
           ],

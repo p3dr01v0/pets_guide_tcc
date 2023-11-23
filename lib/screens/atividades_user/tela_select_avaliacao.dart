@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/atividades_user/tela_avaliacao.dart';
@@ -50,7 +49,7 @@ class _TelaSelectAvaliacaoState extends State<TelaSelectAvaliacao> {
           .where("status", isEqualTo: 4)
           .where("avaliado", isNotEqualTo: true)
           .snapshots();
-          return agendamentosQuery;
+      return agendamentosQuery;
     } else {
       return null;
     }
@@ -59,10 +58,11 @@ class _TelaSelectAvaliacaoState extends State<TelaSelectAvaliacao> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
+      backgroundColor:
+          const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        backgroundColor: const Color(0xFF10428B),
         title: const Text('Últimos serviços'),
+        backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
         child: _user != null
@@ -95,9 +95,18 @@ class _TelaSelectAvaliacaoState extends State<TelaSelectAvaliacao> {
 
                               final String servico =
                                   documents[index]['servico'].toString();
-                              final horario =
-                                  documents[index]['horario'].toString();
-                              final data = documents[index]['data'].toString();
+                              final String petName =
+                                  documents[index]['petName'].toString();
+                              final String petImg =
+                                  documents[index]['petImage'].toString();
+                              final horarioEntrada =
+                                  documents[index]['horarioEntrada'].toString();
+                              final dataEntrada =
+                                  documents[index]['dataEntrada'].toString();
+                              final horarioSaida =
+                                  documents[index]['horarioSaida'].toString();
+                              final dataSaida =
+                                  documents[index]['dataSaida'].toString();
                               final statusNumber = documents[index]['status'];
                               String showStatus = '';
                               switch (statusNumber) {
@@ -137,7 +146,7 @@ class _TelaSelectAvaliacaoState extends State<TelaSelectAvaliacao> {
                                           builder: (context) => TelaAvaliacao(
                                             estabelecimentoId:
                                                 widget.estabelecimentoId,
-                                                agendamentoId: idAgendamento,
+                                            agendamentoId: idAgendamento,
                                           ),
                                         ));
                                   },
@@ -147,13 +156,41 @@ class _TelaSelectAvaliacaoState extends State<TelaSelectAvaliacao> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       const SizedBox(height: 6),
-                                      Text(data),
-                                      const SizedBox(height: 2),
-                                      Text(horario),
+                                      Text('Para $petName'),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                          'Check-In: $dataEntrada às $horarioEntrada'),
+                                      const SizedBox(height: 4),
+                                      dataSaida.isNotEmpty &&
+                                              horarioSaida.isNotEmpty
+                                          ? Text(
+                                              'Check-Out: $dataSaida às $horarioSaida')
+                                          : const SizedBox(height: 24),
                                       const SizedBox(height: 14),
-                                      Text('ID: $idAgendamento'),
                                       const SizedBox(height: 16),
                                       Text(showStatus)
+                                    ],
+                                  ),
+                                  leading: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // ignore: unnecessary_null_comparison
+                                      petImg == null || petImg == ''
+                                          ? const Icon(
+                                              Icons.pets,
+                                              size: 36,
+                                            )
+                                          : ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(360),
+                                              child: Image.network(
+                                                petImg,
+                                                width: 56,
+                                                height: 56,
+                                              ),
+                                            ),
                                     ],
                                   ),
                                 ),

@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -60,6 +58,8 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
     FirebaseFirestore db = FirebaseFirestore.instance;
 
     FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      // listener para receber
+
       if (mounted && user != null && widget.estabelecimentoId.isNotEmpty) {
         logger.d('ID de user${user.uid}');
         uid = user.uid;
@@ -78,10 +78,14 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
           "estabelecimentoId": widget.estabelecimentoId,
           "UID": uid,
           "isAccept": false,
+          "avaliado": false,
           "status": 0,
-          "horario": widget.horario,
-          "data": widget.data,
-          "dataOfc": widget.dataOfc,
+          "horarioEntrada": widget.horario,
+          "horarioSaida": '',
+          "dataEntrada": widget.data,
+          "dataSaida": 'widget.dataSaida',
+          "dataOfcEntrada": widget.dataOfc,
+          "dataOfcSaida": '',
           "dataAgendamento": DateTime.now(),
           "servico": widget.servico,
           "petId": selectedPet,
@@ -94,35 +98,27 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
           "petRace": petRace
         };
 
-        try {
-          // Adiciona um novo documento com um ID gerado com imagem
-          DocumentReference doc = await db
-              .collection(
-                  "estabelecimentos/${widget.estabelecimentoId}/${widget.typeService}/${widget.nomeAgenda}/agendamentos")
-              .add(agendamento);
+// Add a new document with a generated ID with image
 
-          await db
-              .collection("user/$uid/agendamentos")
-              .doc(doc.id)
-              .set(agendamento);
-
+        db
+            .collection(
+                "estabelecimentos/${widget.estabelecimentoId}/${widget.typeService}/${widget.nomeAgenda}/agendamentos")
+            .add(agendamento)
+            .then((DocumentReference doc) {
+          db.collection("user/$uid/agendamentos").doc(doc.id).set(agendamento);
           logger.d('DocumentSnapshot added with ID: ${doc.id}');
-
+        }).then((_) {
           Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const homeUser()),
-            (route) => false,
-          );
-
+              context,
+              MaterialPageRoute(builder: (context) => homeUser()),
+              (route) => false);
           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TelaHistoricoUser(),
-            ),
-          );
-        } catch (error) {
-          logger.d(error);
-        }
+              context,
+              MaterialPageRoute(
+                builder: (context) => TelaHistoricoUser(),
+              ));
+          // ignore: invalid_return_type_for_catch_error
+        }).catchError((error) => logger.d(error));
       }
     });
   }
@@ -130,10 +126,11 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 255, 243, 236),
+        backgroundColor:
+            const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
         appBar: AppBar(
-          backgroundColor: const Color(0xFF10428B),
           title: const Text('Finalizar Agendamento'),
+          backgroundColor: const Color(0xFF10428B),
         ),
         body: SingleChildScrollView(
           child: Center(
@@ -157,8 +154,8 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
                               children: [
                                 Text(widget.servico),
                                 Text(widget.data),
-                                Text('HR: ${widget.horario}'),
-                                Text('R\$ ${widget.preco}'),
+                                Text(widget.horario),
+                                Text(widget.preco),
                                 const SizedBox(
                                   height: 15,
                                 )
@@ -209,20 +206,11 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
                           ),
                           const SizedBox(height: 12),
                           FilledButton(
-                            onPressed: _submitAgendamento,
-                            style: ButtonStyle(
-                              fixedSize: const MaterialStatePropertyAll(
-                                  Size(250.0, 40.0)),
-                              backgroundColor:
-                                  MaterialStateProperty.resolveWith<Color>(
-                                (Set<MaterialState> states) {
-                                  return Color.fromARGB(
-                                      255, 69, 143, 255); // Cor azul desejada
-                                },
-                              ),
-                            ),
-                            child: const Text('Finalizar'),
-                          )
+                              onPressed: _submitAgendamento,
+                              style: const ButtonStyle(
+                                  fixedSize: MaterialStatePropertyAll(
+                                      Size(250.0, 40.0))),
+                              child: const Text('Concluir'))
                         ],
                       ),
                     )

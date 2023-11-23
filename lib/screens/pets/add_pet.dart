@@ -7,7 +7,7 @@ import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dar
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import 'package:flutter_application_1/servicos/img_padrao.dart';
-import '../perfis/perfil_user.dart';
+import '../interface_user/perfil_user.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../style/btn_cadastro.dart';
@@ -36,8 +36,8 @@ class _TelaAddPet extends State<TelaAddPet> {
 
   final FirebaseStorage storage = FirebaseStorage.instance;
   String? imageUrl;
-  XFile? _selectedImage; 
-  
+  XFile? _selectedImage;
+
   // Armazena a imagem selecionada
 
   Future<XFile?> getImage() async {
@@ -79,57 +79,55 @@ class _TelaAddPet extends State<TelaAddPet> {
 
   String? nome;
 
-void _adicionarPet() async {
-  if (_formKey.currentState!.validate()) {
-    _formKey.currentState!.save();
+  void _adicionarPet() async {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
 
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null && mounted) {
-        String UID = user.uid;
+      try {
+        User? user = FirebaseAuth.instance.currentUser;
+        if (user != null && mounted) {
+          String UID = user.uid;
 
-        String nome = _nomePetController.text;
-        String raca = _racaPetController.text;
-        String idade = _idadePetController.text;
-        String peso = _pesoPetController.text;
-        String observacoes = _observacoesController.text;
+          String nome = _nomePetController.text;
+          String raca = _racaPetController.text;
+          String idade = _idadePetController.text;
+          String peso = _pesoPetController.text;
+          String observacoes = _observacoesController.text;
 
-        final pet = <String, dynamic>{
-          "UID": UID,
-          "tipo": selectedType,
-          "nome": nome,
-          "raca": raca,
-          "idade": idade,
-          "peso": peso,
-          "sexo": selectedSex!,
-          "porte": selectedSize!,
-          "observacoes": observacoes,
-          "imagePet": imageUrl,
-        };
+          final pet = <String, dynamic>{
+            "UID": UID,
+            "tipo": selectedType,
+            "nome": nome,
+            "raca": raca,
+            "idade": idade,
+            "peso": peso,
+            "sexo": selectedSex!,
+            "porte": selectedSize!,
+            "observacoes": observacoes,
+            "imagePet": imageUrl,
+          };
 
-        await FirebaseFirestore.instance
-            .collection("user")
-            .doc(UID)
-            .collection("pets")
-            .add(pet)
-            .then((DocumentReference doc) =>
-                print('DocumentSnapshot added with ID: ${doc.id} with image'))
-            .catchError((error) => print(error));
+          await FirebaseFirestore.instance
+              .collection("user")
+              .doc(UID)
+              .collection("pets")
+              .add(pet)
+              .then((DocumentReference doc) =>
+                  print('DocumentSnapshot added with ID: ${doc.id} with image'))
+              .catchError((error) => print(error));
 
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const perfilUser()),
-          );
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const perfilUser()),
+            );
+          }
         }
+      } catch (e) {
+        print("Erro ao adicionar pet: $e");
       }
-    } catch (e) {
-      print("Erro ao adicionar pet: $e");
     }
   }
-}
-
-
 
   void loadUserData() async {
     String? userUid = _auth.currentUser?.uid;
@@ -143,7 +141,8 @@ void _adicionarPet() async {
       });
     }
   }
-   List<String> dogSizes = ['Pequeno', 'Médio', 'Grande'];
+
+  List<String> dogSizes = ['Pequeno', 'Médio', 'Grande'];
   List<String> petTypes = ['Cachorro', 'Gato'];
 
   String? selectedType = 'Cachorro';
@@ -208,7 +207,8 @@ void _adicionarPet() async {
                 autenticacaoServico().deslogar();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AutentiacacaoTela()),
+                  MaterialPageRoute(
+                      builder: (context) => const AutentiacacaoTela()),
                 );
               },
             ),
@@ -260,7 +260,8 @@ void _adicionarPet() async {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: btnDrop(selectedSize!, dogSizes, (String? newValue) {
+                        child: btnDrop(selectedSize!, dogSizes,
+                            (String? newValue) {
                           setState(() {
                             selectedSize = newValue!;
                           });
@@ -270,7 +271,8 @@ void _adicionarPet() async {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: btnDrop(selectedSex!, ['Macho', 'Fêmea'], (String? newValue) {
+                        child: btnDrop(selectedSex!, ['Macho', 'Fêmea'],
+                            (String? newValue) {
                           setState(() {
                             selectedSex = newValue!;
                           });
