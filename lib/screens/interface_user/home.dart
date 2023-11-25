@@ -3,15 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_config.dart';
 import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
 import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:logger/logger.dart';
 import '../cad_log/cad_log_user.dart';
-import '../../servicos/img_padrao.dart';
 import '../pets/add_pet.dart';
+
+var logger = Logger();
 
 class homeUser extends StatefulWidget {
   const homeUser({Key? key}) : super(key: key);
@@ -29,10 +33,28 @@ class _homeUserState extends State<homeUser> {
   String? email;
   String? telefone;
   String? imageUser;
+  String? imageEstab;
+  String? ramoPrincipal;
   User? _user;
   int _currentIndex = 0;
 
   List<Map<String, dynamic>> _providers = [];
+  List<String> cidades = <String>[
+    "Americana",
+    "São Paulo",
+    "Campinas",
+    "Santa Barbara D'Oeste",
+    "Nova Odessa",
+    "Santos",
+    "Ribeirão Preto",
+    "Limeira",
+    "Sumaré",
+    "São Carlos",
+    "Hortolândia",
+    "Monte Mor",
+  ];
+
+  String cidadeSelecionada = "Americana";
 
   @override
   void initState() {
@@ -119,49 +141,119 @@ class _homeUserState extends State<homeUser> {
   }
 
   Future<void> _fetchProviders(String uid) async {
-    final estabelecimentoCollection = _firestore
-        .collection('estabelecimentos')
-        .where('servico', isEqualTo: true);
+    _providers.clear();
 
-    estabelecimentoCollection.get().then((QuerySnapshot querySnapshot) {
-      if (querySnapshot.docs.isNotEmpty) {
-        List<Map<String, dynamic>> tempProviders = [];
+    try {
+      final estabelecimentoCollection = _firestore
+          .collection('estabelecimentos')
+          .where('servico', isEqualTo: true);
 
-        for (QueryDocumentSnapshot document in querySnapshot.docs) {
-          final informacoesReference = document.reference.collection('info');
-          informacoesReference
-              .get()
-              .then((QuerySnapshot informacoesQuerySnapshot) {
-            if (informacoesQuerySnapshot.docs.isNotEmpty) {
-              // A subcoleção "info" existe neste documento de "estabelecimentos"
-              for (QueryDocumentSnapshot infoDoc
-                  in informacoesQuerySnapshot.docs) {
-                Map<String, dynamic> data =
-                    infoDoc.data() as Map<String, dynamic>;
-                data['dono'] = document[
-                    'dono']; // Adicionando o campo 'dono' da coleção pai
-                data['UID'] =
-                    document.id; // Adicionando o campo 'UID' da coleção pai
-                tempProviders.add(data);
-              }
-            } else {
-              // A subcoleção "info" não existe neste documento de "estabelecimentos"
-              print('A subcoleção "info" não existe neste documento.');
-            }
+      QuerySnapshot estabelecimentoSnapshot =
+          await estabelecimentoCollection.get();
 
-            setState(() {
-              _providers = List.from(tempProviders);
-            });
-          }).catchError((error) {
-            print('Erro ao consultar a subcoleção "info": $error');
+      for (QueryDocumentSnapshot document in estabelecimentoSnapshot.docs) {
+        final infoReference = document.reference
+            .collection('info')
+            .where("cidade", isEqualTo: cidadeSelecionada);
+
+        QuerySnapshot infoQuerySnapshot = await infoReference.get();
+
+        if (infoQuerySnapshot.docs.isNotEmpty) {
+          setState(() {
+            _providers.addAll(infoQuerySnapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+
+              final nome = data['nome'] as String? ?? 'Nome Indisponível';
+              final servicosConcluidos =
+                  data['servicosConcluidos'] as int? ?? 0;
+              final notaMedia = data['notaMedia'] as num? ?? 0.0;
+              final ramoPrincipal = data['ramoPrincipal'] as String?;
+              imageEstab = data['imageEstabelecimento'] as String? ?? '';
+
+              print('Image URL: $imageEstab');
+              return {
+                'UID': document.id,
+                'nome': nome,
+                'servicosConcluidos': servicosConcluidos,
+                'notaMedia': notaMedia,
+                'ramoPrincipal': ramoPrincipal,
+                'imageEstab': imageEstab,
+              };
+            }).toList());
           });
+          print('A subcoleção "info" existe neste documento.');
+        } else {
+          _providers.clear();
+          print('A subcoleção "info" não existe neste documento.');
         }
-      } else {
-        print('A coleção "estabelecimentos" está vazia ou não existe.');
       }
-    }).catchError((error) {
-      print('Erro ao consultar a coleção "estabelecimentos": $error');
+    } catch (error) {
+      print('Erro ao consultar estabelecimentos: $error');
+    }
+  }
+
+  Future<void> _selecionarFavoritos(String idEstabelecimento) async {
+    logger.d(_user!.uid);
+    if (idEstabelecimento.isNotEmpty && _user != null) {
+      final String uid = _user!.uid;
+      try {
+        QuerySnapshot favoritoExistente = await _firestore
+            .collection('user/$uid/favoritos')
+            .where("estabelecimento", isEqualTo: idEstabelecimento)
+            .get();
+
+        if (favoritoExistente.docs.isNotEmpty) {
+          var favoritoId = favoritoExistente.docs.first.id;
+          await _firestore
+              .collection('user/$uid/favoritos')
+              .doc(favoritoId)
+              .delete();
+
+          logger.d('Favorito removido com sucesso.');
+        } else {
+          await _firestore
+              .collection('user/$uid/favoritos')
+              .add({"estabelecimento": idEstabelecimento}).then(
+                  (DocumentReference doc) {
+            logger.d('Favorito adicionado com ID: $doc');
+            // ignore: invalid_return_type_for_catch_error
+          }).catchError((error) => logger.e(error));
+        }
+      } on FirebaseException catch (e) {
+        logger.e(e);
+      }
+    }
+  }
+
+  Stream<bool> _isFavoriteStream(String estabelecimentoId) {
+    if (_user == null) {
+      return Stream.value(false);
+    }
+
+    final String uid = _user!.uid;
+
+    Stream<QuerySnapshot> querySnapshots = _firestore
+        .collection('user/$uid/favoritos')
+        .where("estabelecimento", isEqualTo: estabelecimentoId)
+        .snapshots();
+
+    return querySnapshots.map((QuerySnapshot snapshot) {
+      return snapshot.docs.isNotEmpty;
     });
+  }
+
+  Widget _getIconForRamo(String ramoPrincipal) {
+    print("Valor de ramoPrincipal antes do switch case: $ramoPrincipal");
+    switch (ramoPrincipal) {
+      case "Banho e tosa":
+        return const Icon(Icons.shower, color: Colors.orange);
+      case "Veterinária":
+        return const Icon(Icons.medical_services, color: Colors.orange);
+      case "Hotel pet":
+        return const Icon(Icons.other_houses_rounded, color: Colors.orange);
+      default:
+        return const SizedBox();
+    }
   }
 
   @override
@@ -197,16 +289,8 @@ class _homeUserState extends State<homeUser> {
               ),
             ),
             ListTile(
-              title: const Text('Add pet'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Perfil'),
+              leading: const Icon(Icons.person),
+              title: const Text("Meu perfil"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -215,7 +299,18 @@ class _homeUserState extends State<homeUser> {
               },
             ),
             ListTile(
-              title: const Text('Histórico'),
+              leading: const Icon(Icons.add),
+              title: const Text("Adicionar Pet"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text("Histórico"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -224,6 +319,15 @@ class _homeUserState extends State<homeUser> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.star_rounded),
+              title: const Text("Favoritos"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaFavoritos()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
               title: const Text('Deslogar'),
               onTap: () {
                 print("deslogando");
@@ -235,6 +339,14 @@ class _homeUserState extends State<homeUser> {
                 );
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Configurações"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaConfig()));
+              },
+            ),
           ],
         ),
       ),
@@ -242,12 +354,30 @@ class _homeUserState extends State<homeUser> {
         child: _user != null
             ? Column(
                 children: [
+                  DropdownButton<String>(
+                    padding: const EdgeInsets.only(bottom: 0),
+                    menuMaxHeight: 272,
+                    value: cidadeSelecionada,
+                    items: cidades
+                        .map((cidade) => DropdownMenuItem(
+                              value: cidade,
+                              child: Text(cidade),
+                            ))
+                        .toList(),
+                    onChanged: (cidade) {
+                      setState(() {
+                        cidadeSelecionada = cidade!;
+                      });
+                      _fetchProviders(_user!.uid);
+                    },
+                  ),
                   //Text('ID do usuário autenticado: ${_user!.uid}'),
-                  const Text('Estabelecimentos disponíveis:'),
+                  //const Text('Estabelecimentos disponíveis:'),
                   Expanded(
                     child: ListView.builder(
                       itemCount: _providers.length,
                       itemBuilder: (context, index) {
+                        final num notaMedia = _providers[index]['notaMedia'];
                         return GestureDetector(
                           onTap: () {
                             final estabelecimentoId = _providers[index]['UID'];
@@ -270,34 +400,95 @@ class _homeUserState extends State<homeUser> {
                               horizontal: 16.0,
                             ),
                             child: ListTile(
-                              title: Text('Nome: ${_providers[index]['nome']}'),
+                              title: Text(
+                                '${_providers[index]['nome'] ?? ''}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                      'Telefone: ${_providers[index]['contato']}'),
-                                  Text('dono: ${_providers[index]['dono']}'),
+                                  Row(
+                                    children: [
+                                      const Text('serv. principal:'),
+                                      const SizedBox(
+                                          width:
+                                              8), // Adiciona um espaço entre o texto e o ícone
+                                      _getIconForRamo(
+                                          _providers[index]['ramoPrincipal']),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'serv. concluídos: ${_providers[index]['servicosConcluidos']}',
+                                      ),
+                                      const SizedBox(
+                                        width: 16,
+                                      ),
+                                      RatingBarIndicator(
+                                        itemSize: 15,
+                                        rating: notaMedia.toDouble(),
+                                        itemBuilder: (context, index) =>
+                                            const Icon(
+                                          Icons.star_rounded,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                               leading: SizedBox(
                                 width: 50.0,
                                 height: 50.0,
-                                child: _providers[index]
-                                            ['imageEstabelecimento'] !=
-                                        null
+                                child: _providers[index]['imageEstab'] != null
                                     ? ClipOval(
                                         child: Image.network(
-                                          _providers[index]
-                                              ['imageEstabelecimento'],
+                                          _providers[index]['imageEstab'],
                                           alignment: Alignment.center,
                                           width: 72.0,
                                           height: 72.0,
                                           fit: BoxFit.cover,
                                         ),
                                       )
-                                    : imgEst(), // Use imgEst aqui
+                                    : const CircleAvatar(
+                                        radius: 40,
+                                        backgroundImage: AssetImage(
+                                            'imagens/estabelecimento.png'),
+                                      ),
                               ),
-                              trailing: const Icon(Icons.favorite),
+                              trailing: GestureDetector(
+                                onTap: () {
+                                  _selecionarFavoritos(
+                                      _providers[index]['UID']);
+                                },
+                                child: StreamBuilder<bool>(
+                                  stream: _isFavoriteStream(
+                                      _providers[index]['UID']),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const CircularProgressIndicator();
+                                    } else if (snapshot.hasError) {
+                                      return const Icon(Icons.favorite_border,
+                                          color: Colors.grey);
+                                    } else {
+                                      bool isFavorite = snapshot.data ?? false;
+
+                                      return Icon(
+                                        isFavorite
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        color: isFavorite
+                                            ? const Color.fromARGB(
+                                                255, 255, 168, 7)
+                                            : Colors.grey,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
                               isThreeLine: true,
                             ),
                           ),

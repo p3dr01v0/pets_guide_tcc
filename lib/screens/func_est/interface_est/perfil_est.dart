@@ -7,6 +7,7 @@ import 'package:flutter_application_1/screens/atividades_user/ver_avaliacoes.dar
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_info_est.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_serv_est.dart';
+import 'package:flutter_application_1/screens/func_est/atividade_est/editar_est.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/tela_config_est.dart';
 import 'package:flutter_application_1/screens/func_est/interface_est/telaBanhoETosa.dart';
 import 'package:flutter_application_1/screens/func_est/interface_est/telaHotelPet.dart';
@@ -177,6 +178,20 @@ class _perfilEstState extends State<perfilEst> {
     });
   }
 
+  Widget _buildUserImage() {
+    if (imagemEst != null && imagemEst!.isNotEmpty) {
+      return CircleAvatar(
+        radius: 40,
+        backgroundImage: NetworkImage(imagemEst!),
+      );
+    } else {
+      return const CircleAvatar(
+        radius: 40,
+        backgroundImage: AssetImage('imagens/estabelecimento.png'),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,22 +211,21 @@ class _perfilEstState extends State<perfilEst> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 15.0),
-                  Text('Nome: $username'),
+                  _buildUserImage(),
+                  const SizedBox(height: 14.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 2.0),
+                    child: Text(
+                      '$username',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ],
               ),
             ),
             ListTile(
-              title: const Text('acrescentar Informações'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const telaAddInfo()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Add serviço'),
+              leading: const Icon(Icons.add),
+              title: const Text('Adicionar serviço'),
               onTap: () {
                 Navigator.push(
                   context,
@@ -220,15 +234,7 @@ class _perfilEstState extends State<perfilEst> {
               },
             ),
             ListTile(
-              title: const Text('Perfil'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => perfilEst()),
-                );
-              },
-            ),
-            ListTile(
+              leading: const Icon(Icons.logout),
               title: const Text('Deslogar'),
               onTap: () {
                 autenticacaoServico().deslogar();
@@ -297,7 +303,24 @@ class _perfilEstState extends State<perfilEst> {
                                       ),
                                       iconSize: 15.0,
                                       onPressed: () {
-                                        print("editar estabelecimento");
+                                        print(
+                                            "Editar estabelecimento - UID: ${_user?.uid}");
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EditarInfoEstabelecimento(
+                                              userUID: _user!.uid,
+                                              username: username!,
+                                              email: email!,
+                                              contato: Contato!,
+                                              imageEst: imagemEst!,
+                                              contatoInfo: contatoInfo!,
+                                              nomeInfo: nomeInfo!,
+                                              fundacao: fundacao!,
+                                            ),
+                                          ),
+                                        );
                                       },
                                     ),
                                   ),

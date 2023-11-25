@@ -48,6 +48,8 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
   Stream<QuerySnapshot<Map<String, dynamic>>>? _getScheduleStream(String uid) {
     if (_user != null) {
       uid = _user!.uid;
+      logger.d("Getting Schedule Stream for UID: $uid");
+
       return _firestore
           .collection('user/$uid/agendamentos')
           .where("UID", isEqualTo: uid)
@@ -119,25 +121,28 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                             itemBuilder: (context, index) {
                               // Chame a função fetchData para buscar os dados do pet
 
+                              final data = documents[index].data()
+                                  as Map<String, dynamic>;
+
                               final String servico =
-                                  documents[index]['servico'].toString();
+                                  data['servico']?.toString() ?? '';
                               final horarioEntrada =
-                                  documents[index]['horarioEntrada'].toString();
+                                  data['horarioEntrada']?.toString() ?? '';
                               final dataEntrada =
-                                  documents[index]['dataEntrada'].toString();
+                                  data['dataEntrada']?.toString() ?? '';
                               final horarioSaida =
-                                  documents[index]['horarioSaida'].toString();
+                                  data['horarioSaida']?.toString() ?? '';
                               final dataSaida =
-                                  documents[index]['dataSaida'].toString();
-                              final statusNumber = documents[index]['status'];
+                                  data['dataSaida']?.toString() ?? '';
+                              final statusNumber = data['status'];
                               final bool avaliacaoDisp =
-                                  !documents[index]['avaliado'];
-                              final petId = documents[index]['petId'];
-                              final userId = documents[index]['UID'];
-                              final provId = documents[index]
-                                      ['estabelecimentoId']
-                                  .toString();
+                                  !(data['avaliado'] ?? false);
+                              final petId = data['petId']?.toString() ?? '';
+                              final userId = data['UID']?.toString() ?? '';
+                              final provId =
+                                  data['estabelecimentoId']?.toString() ?? '';
                               final agendamentoId = documents[index].id;
+
                               String showStatus = '';
                               Color cor = Colors.grey;
                               IconData icone = Icons.circle_outlined;
@@ -147,6 +152,7 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                                   icone = Icons.circle_outlined;
                                   cor = Colors.grey;
                                   showStatus = 'Aguardando Resposta';
+                                  break;
                                 case 1:
                                   icone = Icons.circle;
                                   cor = Colors.lightBlue;
@@ -172,6 +178,7 @@ class _TelaHistoricoUserState extends State<TelaHistoricoUser> {
                                   icone = Icons.remove_circle_rounded;
                                   cor = const Color.fromARGB(255, 221, 55, 43);
                                   showStatus = 'Cancelado pelo estabelecimento';
+                                  break;
                                 default:
                                   showStatus =
                                       'Não foi possível identificar o estado de agendamento';

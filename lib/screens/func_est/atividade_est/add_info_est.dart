@@ -31,6 +31,30 @@ class _telaAddInfo extends State<telaAddInfo> {
   String? imageUrl;
   XFile? _selectedImage; // Armazena a imagem selecionada
 
+  List<String> cidades = <String>[
+    "Americana",
+    "São Paulo",
+    "Campinas",
+    "Santa Barbara D'Oeste",
+    "Nova Odessa",
+    "Santos",
+    "Ribeirão Preto",
+    "Limeira",
+    "Sumaré",
+    "São Carlos",
+    "Hortolândia",
+    "Monte Mor",
+  ];
+
+  List<String> pricipalRamo = <String>[
+    "Banho e tosa",
+    "Veterinária",
+    "Hotel pet",
+  ];
+
+  String ramoSelecionado = "Banho e tosa";
+  String cidadeSelecionada = "Americana";
+
   Future<XFile?> getImage() async {
     final ImagePicker _picker = ImagePicker();
     XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -65,7 +89,6 @@ class _telaAddInfo extends State<telaAddInfo> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _ruaController = TextEditingController();
   final TextEditingController _bairroController = TextEditingController();
-  final TextEditingController _cidadeController = TextEditingController();
   final TextEditingController _estadoController = TextEditingController();
   final TextEditingController _numeroController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
@@ -84,7 +107,6 @@ class _telaAddInfo extends State<telaAddInfo> {
       String telefone = _telefoneController.text;
       String rua = _ruaController.text;
       String bairro = _bairroController.text;
-      String cidade = _cidadeController.text;
       String estado = _estadoController.text;
       String numero = _numeroController.text;
       String data = _dataFundacaoController.text;
@@ -105,18 +127,18 @@ class _telaAddInfo extends State<telaAddInfo> {
           final localizacao = <String, dynamic>{
             "rua": rua,
             "bairro": bairro,
-            "cidade": cidade,
+            "cidade": cidadeSelecionada,
             "estado": estado,
             "numero": numero,
             "cep": cep
           }; // Informações de endereço
           db
-              .collection("estabelecimentos")
-              .doc(UID)
-              .collection("localizacao")
-              .add(localizacao)
+              .collection(
+                  "estabelecimentos/$UID/localizacao") // cria a coleção localização
+              .doc('endereco')
+              .set(localizacao)
               .then((_) =>
-                  print('documento da localização adicionado com sucesso'))
+                  print('DocumentSnapshot added with ID: endereco Adress Info'))
               .catchError((error) => print(error));
 
           if (imageUrl != null) {
@@ -126,10 +148,15 @@ class _telaAddInfo extends State<telaAddInfo> {
               "contato": telefone,
               "fundacao": data,
               "dataCadastro": dataAtual,
+              "cidade": cidadeSelecionada,
+              "ramoPrincipal": ramoSelecionado,
               "servicosConcluidos": 0,
               "notaMedia": 0,
               "notaAcumulada": 0,
-              "avaliacoes": 0
+              "avaliacoes": 0,
+              "banhoTosa": false,
+              "vet": false,
+              "hotelPet": false,
             }; // Informações do Estabelecimento
             db
                 .collection("estabelecimentos")
@@ -147,14 +174,19 @@ class _telaAddInfo extends State<telaAddInfo> {
           } else {
             final infoEstabelecimento = <String, dynamic>{
               "nome": nome,
-              "imageEstabelecimento": "imagens/estabelecimento.png",
+              "imageEstabelecimento": "",
               "contato": telefone,
               "fundacao": data,
               "dataCadastro": dataAtual,
+              "cidade": cidadeSelecionada,
+              "ramoPrincipal": ramoSelecionado,
               "servicosConcluidos": 0,
               "notaMedia": 0,
               "notaAcumulada": 0,
-              "avaliacoes": 0
+              "avaliacoes": 0,
+              "banhoTosa": false,
+              "vet": false,
+              "hotelPet": false,
             }; // Informações do Estabelecimento
             db
                 .collection("estabelecimentos")
@@ -254,8 +286,60 @@ class _telaAddInfo extends State<telaAddInfo> {
                   ],
                 ),
                 const SizedBox(
-                  height: 8,
+                  height: 12,
                 ),
+                const Text(
+                  "qual o principal ramo do estabelecimento ?",
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontFamily: 'Roboto',
+                  ),
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(23.0),
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFF10428B),
+                      width: 1,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                  width: 345, //tamanho do container
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        ramoSelecionado,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          menuMaxHeight: 272,
+                          items: pricipalRamo
+                              .map((ramoPricipal) => DropdownMenuItem(
+                                    value: ramoPricipal,
+                                    child: Text(
+                                      ramoPricipal,
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (ramoPricipal) {
+                            setState(() {
+                              ramoSelecionado = ramoPricipal!;
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -270,6 +354,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -284,6 +369,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -298,10 +384,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
-
-                /*const Row(
-                  children: [Text('Localização')],
-                ),*/
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -316,20 +399,50 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: _cidadeController,
-                    decoration: caixaTxt('Cidade'),
-                    keyboardType: TextInputType.name,
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        return 'Campo Obrigatório';
-                      }
-                      return null;
-                    },
+                const SizedBox(height: 8.0),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(23.0),
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFF10428B),
+                      width: 1,
+                    ),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                  width: 345, //tamanho do container
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        cidadeSelecionada,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          menuMaxHeight: 272,
+                          items: cidades
+                              .map((cidade) => DropdownMenuItem(
+                                    value: cidade,
+                                    child: Text(
+                                      cidade,
+                                      style:
+                                          const TextStyle(color: Colors.black),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (cidade) {
+                            setState(() {
+                              cidadeSelecionada = cidade!;
+                            });
+                          },
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -343,6 +456,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -357,6 +471,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -371,6 +486,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
@@ -385,6 +501,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     },
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 if (_selectedImage != null)
                   Image.file(File(_selectedImage!.path)),
                 Padding(
@@ -396,6 +513,7 @@ class _telaAddInfo extends State<telaAddInfo> {
                     text: 'Selecionar Imagem',
                   ),
                 ),
+                const SizedBox(height: 8.0),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: btnPersonalizado(

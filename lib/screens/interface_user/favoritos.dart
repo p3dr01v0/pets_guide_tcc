@@ -1,10 +1,18 @@
-// ignore_for_file: unused_field, body_might_complete_normally_nullable
+// ignore_for_file: body_might_complete_normally_nullable, unused_field, avoid_print
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_config.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
+import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
+import 'package:flutter_application_1/screens/interface_user/home.dart';
+import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
 import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
+import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
+import 'package:flutter_application_1/screens/pets/add_pet.dart';
+import 'package:flutter_application_1/servicos/auth_svc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:logger/logger.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 var logger = Logger();
@@ -21,12 +29,82 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   User? _user;
   List<Map<String, dynamic>> _providers = [];
+  String? nome;
+  String? email;
+  String? telefone;
+  String? imageUser;
+  int _currentIndex = 0;
+  final bool _isVisible = true;
 
   @override
   void initState() {
     super.initState();
     // Verifique se há um usuário autenticado quando o widget é iniciado
     _checkCurrentUser();
+    loadUserData();
+  }
+
+  void loadUserData() async {
+    String? userUid = _auth.currentUser?.uid;
+
+    if (userUid != null && mounted) {
+      DocumentSnapshot userData =
+          await _firestore.collection('user').doc(userUid).get();
+
+      setState(() {
+        nome = userData['nome'];
+        email = userData['email'];
+        telefone = userData['telefone'];
+        imageUser = userData['imageUser'];
+      });
+    }
+  }
+
+  void navegar(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+
+    if (index == 0) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const homeUser()),
+      );
+      print("Home");
+    } else if (index == 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => pesquisaTeste()),
+      );
+      print("Pesquisa");
+    } else if (index == 2) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TelaFavoritos()),
+      );
+      print("Favoritos");
+    } else if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const perfilUser()),
+      );
+      print("Perfil");
+    }
+  }
+
+  Widget _buildUserImage() {
+    if (imageUser != null && imageUser!.isNotEmpty) {
+      return CircleAvatar(
+        radius: 40,
+        backgroundImage: NetworkImage(imageUser!),
+      );
+    } else {
+      // Se a imagem for nula, exibe uma imagem padrão ou qualquer outra lógica desejada.
+      return const CircleAvatar(
+        radius: 40,
+        backgroundImage: AssetImage('imagens/user.png'),
+      );
+    }
   }
 
   Future<void> _checkCurrentUser() async {
@@ -144,6 +222,92 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       appBar: AppBar(
         title: const Text('Meus Favoritos'),
         backgroundColor: const Color(0xFF10428B),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 34, 96, 190),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildUserImage(), // Usando o método para exibir a imagem do usuário
+                  const SizedBox(height: 14.0),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 18.0), // avança o texto para a direita
+                    child: Text(
+                      '$nome',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("Meu perfil"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const perfilUser()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.add),
+              title: const Text("Adicionar Pet"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text("Histórico"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TelaHistoricoUser()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.star_rounded),
+              title: const Text("Favoritos"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaFavoritos()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Deslogar'),
+              onTap: () {
+                print("deslogando");
+                autenticacaoServico().deslogar();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const AutentiacacaoTela()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Configurações"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaConfig()));
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: FutureBuilder<Stream<QuerySnapshot<Map<String, dynamic>>>?>(
@@ -286,6 +450,46 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                 );
               }
             }),
+      ),
+      bottomNavigationBar: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: _isVisible ? 60.0 : 0.0,
+        decoration: const BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey,
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: const Color.fromARGB(255, 255, 251, 248),
+          currentIndex: _currentIndex,
+          unselectedItemColor: const Color.fromARGB(255, 3, 22, 50),
+          selectedItemColor: const Color(0xFF10428B),
+          onTap: navegar,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Pesquisa',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              label: 'Favoritos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Perfil',
+            ),
+          ],
+        ),
       ),
     );
   }

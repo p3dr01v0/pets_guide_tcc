@@ -1,15 +1,12 @@
 // ignore_for_file: avoid_print, unnecessary_brace_in_string_interps
 
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_application_1/style/btn_cadastro.dart';
-import 'package:flutter_application_1/style/btn_img.dart';
 import 'package:flutter_application_1/style/drop_down.dart';
 import 'package:flutter_application_1/style/style.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 
@@ -24,39 +21,6 @@ class _telaAddServState extends State<telaAddServ> {
   final _formKey = GlobalKey<FormState>();
 
   final FirebaseStorage storage = FirebaseStorage.instance;
-  String? imageUrl;
-  XFile? _selectedImage; // Armazena a imagem selecionada
-
-  Future<XFile?> getImage() async {
-    final ImagePicker _picker = ImagePicker();
-    XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      _selectedImage = image;
-    });
-
-    return image;
-  }
-
-  Future<void> _upload() async {
-    if (_selectedImage == null) {
-      // Caso o usuário não tenha selecionado uma imagem, você pode tratar isso aqui.
-      print('Nenhuma imagem selecionada.');
-      return;
-    }
-
-    try {
-      File file = File(_selectedImage!.path);
-      String ref = 'images/img-${DateTime.now().toString()}.jpg';
-      // ignore: unused_local_variable
-      UploadTask task = storage.ref(ref).putFile(file);
-
-      await storage.ref(ref).putFile(file);
-      imageUrl = await storage.ref(ref).getDownloadURL();
-      print("Upload de imagem concluído. URL da imagem:$imageUrl");
-    } on FirebaseException catch (e) {
-      print('Erro no upload de imagem: ${e.code}');
-    }
-  }
 
   final TextEditingController _duracaoController = TextEditingController();
   final TextEditingController _observacoesController = TextEditingController();
@@ -77,12 +41,16 @@ class _telaAddServState extends State<telaAddServ> {
       String UID;
       FirebaseFirestore db = FirebaseFirestore.instance;
 
-      FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      FirebaseAuth.instance.authStateChanges().listen((User? user) async {
         // listener para receber
 
         if (user != null) {
           print('ID de usuario${user.uid}');
           UID = user.uid;
+
+          final queryInfo =
+              await db.collection('estabelecimentos/$UID/info').get();
+          final infoId = queryInfo.docs.first.id;
 
           if (tipo == 'Veterinário') {
             final vet = <String, dynamic>{
@@ -100,6 +68,10 @@ class _telaAddServState extends State<telaAddServ> {
                 .then((_) {
                   final isService = <String, dynamic>{"servico": true};
                   db.collection('estabelecimentos').doc(UID).update(isService);
+                  db
+                      .collection('estabelecimentos/$UID/info')
+                      .doc(infoId)
+                      .update({'vet': true});
                 })
                 .then((value) => Navigator.pushReplacement(
                     context,
@@ -124,6 +96,10 @@ class _telaAddServState extends State<telaAddServ> {
                 .then((_) {
                   final isService = <String, dynamic>{"servico": true};
                   db.collection('estabelecimentos').doc(UID).update(isService);
+                  db
+                      .collection('estabelecimentos/$UID/info')
+                      .doc(infoId)
+                      .update({'banhoTosa': true});
                 })
                 .then((value) => Navigator.pushReplacement(
                     context,
@@ -148,6 +124,10 @@ class _telaAddServState extends State<telaAddServ> {
                 .then((_) {
                   final isService = <String, dynamic>{"servico": true};
                   db.collection('estabelecimentos').doc(UID).update(isService);
+                  db
+                      .collection('estabelecimentos/$UID/info')
+                      .doc(infoId)
+                      .update({'hotelPet': true});
                 })
                 .then((value) => Navigator.pushReplacement(
                     context,
@@ -323,22 +303,10 @@ class _telaAddServState extends State<telaAddServ> {
                     },
                   ),
                 ),
-                if (_selectedImage != null)
-                  Image.file(File(_selectedImage!.path)),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: btnImg(
-                    onPressed: () {
-                      getImage();
-                    },
-                    text: 'Selecionar Imagem',
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: btnPersonalizado(
                     onPressed: () async {
-                      await _upload();
                       _submit();
                     },
                     text: 'Adicionar serviço',

@@ -61,7 +61,7 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
       backgroundColor:
           const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        title: Text('Avaliações'),
+        title: const Text('Avaliações'),
         backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
@@ -82,7 +82,8 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                             return Text('Erro: ${snapshot.error}');
                           }
 
-                          if (!snapshot.hasData) {
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
                             return const Text('Nenhum dado disponível.');
                           }
 
@@ -115,7 +116,8 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                               final num showNota = nota;
                               return Card(
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15)),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
                                 elevation: 4.0,
                                 margin: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 16.0),
@@ -146,13 +148,12 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                               Icons.person,
                                               size: 36,
                                             )
-                                          : ClipRRect(
-                                              borderRadius:
-                                                  BorderRadius.circular(90),
+                                          : ClipOval(
                                               child: Image.network(
                                                 imageUser,
-                                                width: 72,
-                                                height: 72,
+                                                width: 56,
+                                                height: 56,
+                                                fit: BoxFit.cover,
                                               ),
                                             ),
                                     ],
@@ -161,7 +162,9 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const SizedBox(height: 6),
+                                      const SizedBox(
+                                          height:
+                                              8), // Ajuste o espaçamento conforme necessário
                                       Text(servico),
                                       const SizedBox(height: 8),
                                       Text(
@@ -172,10 +175,8 @@ class _TelaVerAvaliacoesState extends State<TelaVerAvaliacoes> {
                                               'Check-Out: $dataSaida às $horarioSaida')
                                           : const SizedBox(height: 24),
                                       const SizedBox(height: 18),
-                                      if (comentario.isEmpty)
-                                        const SizedBox(height: 28)
-                                      else
-                                        Text('comentario:\n$comentario'),
+                                      if (comentario.isNotEmpty)
+                                        Text('Comentário:\n$comentario'),
                                       const SizedBox(height: 16),
                                     ],
                                   ),

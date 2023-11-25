@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_config.dart';
 import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dart';
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
@@ -483,16 +484,8 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
               ),
             ),
             ListTile(
-              title: const Text('Add pet'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Perfil'),
+              leading: const Icon(Icons.person),
+              title: const Text("Meu perfil"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -501,7 +494,18 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
               },
             ),
             ListTile(
-              title: const Text('Histórico'),
+              leading: const Icon(Icons.add),
+              title: const Text("Adicionar Pet"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text("Histórico"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -510,6 +514,15 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.star_rounded),
+              title: const Text("Favoritos"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaFavoritos()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
               title: const Text('Deslogar'),
               onTap: () {
                 print("deslogando");
@@ -519,6 +532,14 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
                   MaterialPageRoute(
                       builder: (context) => const AutentiacacaoTela()),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("Configurações"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaConfig()));
               },
             ),
           ],

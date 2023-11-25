@@ -154,16 +154,8 @@ class _perfilUserState extends State<perfilUser> {
               ),
             ),
             ListTile(
-              title: const Text('Add pet'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Perfil'),
+              leading: const Icon(Icons.person),
+              title: const Text("Meu perfil"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -172,7 +164,18 @@ class _perfilUserState extends State<perfilUser> {
               },
             ),
             ListTile(
-              title: const Text('Histórico'),
+              leading: const Icon(Icons.add),
+              title: const Text("Adicionar Pet"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TelaAddPet()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.menu_book),
+              title: const Text("Histórico"),
               onTap: () {
                 Navigator.push(
                   context,
@@ -181,6 +184,15 @@ class _perfilUserState extends State<perfilUser> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.star_rounded),
+              title: const Text("Favoritos"),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TelaFavoritos()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout),
               title: const Text('Deslogar'),
               onTap: () {
                 print("deslogando");

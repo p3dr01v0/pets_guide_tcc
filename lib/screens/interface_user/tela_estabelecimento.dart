@@ -46,20 +46,17 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
 
     if (_user != null) {
       try {
-        // Consulta para obter informações básicas do estabelecimento na coleção 'estabelecimentos'
         final estabelecimentoQuerySnapshot = await _firestore
             .collection('estabelecimentos')
             .where('UID', isEqualTo: estabelecimentoId)
             .get();
 
         if (estabelecimentoQuerySnapshot.docs.isNotEmpty) {
-          // Obtenha as referências para as coleções 'info' e 'localizacao'
           final informacoesCollection =
               _firestore.collection('estabelecimentos/$estabelecimentoId/info');
           final localizacaoCollection = _firestore
               .collection('estabelecimentos/$estabelecimentoId/localizacao');
 
-          // Consulta para obter dados da subcoleção 'info'
           final informacoesSnapshot = await informacoesCollection.get();
           final localizacaoSnapshot = await localizacaoCollection.get();
 
@@ -73,9 +70,7 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
               telefone = docInfo['contato'];
               imageEst = docInfo['imageEstabelecimento'];
               fundacao = docInfo['fundacao'];
-              // Campos da subcoleção 'localizacao'
               rua = docLocalizacao['rua'];
-              // Adicione outros campos conforme necessário
             });
 
             final banhoTosaCollection = _firestore
@@ -124,55 +119,44 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
   Future<void> fetchAgendamento() async {
     String estabelecimentoId = widget.estabelecimentoId;
     _user = _auth.currentUser;
+
     if (_user != null) {
       try {
         final agendamentoQuerySnapshot = await _firestore
             .collection('user/${_user!.uid}/agendamentos')
             .where('estabelecimentoId', isEqualTo: estabelecimentoId)
             .where('status', isEqualTo: 4)
+            .where('avaliado', isEqualTo: false) // Adicionando a condição aqui
             .get();
 
         if (agendamentoQuerySnapshot.docs.isNotEmpty) {
-          print('a subcoleção agendamentos existe em user:${_user!.uid}');
-          final avaliacoesQuerySnapshot = await _firestore
-              .collection('user/${_user!.uid}/avaliacoes')
-              .get();
+          print('A subcoleção "agendamentos" existe em user:${_user!.uid}');
 
-          if (avaliacoesQuerySnapshot.docs.isNotEmpty) {
-            int agendamentos = agendamentoQuerySnapshot.size;
-            int avaliacoes = avaliacoesQuerySnapshot.size;
-
-            if (avaliacoes < agendamentos) {
-              if (mounted) {
-                setState(() {
-                  avaliacaoDisponivel = true;
-                });
-              }
-            }
-          } else {
-            if (mounted) {
-              setState(() {
-                avaliacaoDisponivel = false;
-              });
-            }
+          if (mounted) {
+            setState(() {
+              avaliacaoDisponivel = true;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              avaliacaoDisponivel = false;
+            });
           }
         }
       } on FirebaseException catch (e) {
-        // Trate erros de consulta
         print('Erro ao consultar Firestore: $e');
       }
     }
-    await Future.delayed(
-        const Duration(seconds: 2)); // Simula uma busca no Firestore.
+
+    await Future.delayed(const Duration(seconds: 2));
   }
 
   @override
   Widget build(BuildContext context) {
-    Color cardBackgroundColor = const Color.fromARGB(
-        255, 252, 252, 252); // Defina a cor de fundo padrão do card
+    Color cardBackgroundColor = const Color.fromARGB(255, 252, 252, 252);
     return Scaffold(
-      backgroundColor:
-          const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
+      backgroundColor: const Color.fromARGB(255, 255, 243, 236),
       appBar: AppBar(
         backgroundColor: const Color(0xFF10428B),
         title: Text(nomeEstabelecimento,
@@ -182,8 +166,7 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
       ),
       body: Center(
         child: Container(
-          height: MediaQuery.of(context).size.height *
-              0.7, // Altura fixa do Container
+          height: MediaQuery.of(context).size.height * 0.7,
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -223,7 +206,7 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'rua: $rua',
+                                  'Rua: $rua',
                                   style: const TextStyle(fontSize: 24),
                                 ),
                                 const SizedBox(height: 20),
@@ -249,7 +232,6 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
                                         style: ButtonStyles.elevatedButtonStyle(
                                           backgroundColor:
                                               const Color(0xFF10428B),
-                                          // Cor do botão de agendamento
                                           fontSize: 16.0,
                                         ),
                                         child: const Text(
@@ -291,7 +273,6 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
                                                   .outlinedButtonStyle(
                                                 backgroundColor:
                                                     const Color(0xFFFF862D),
-                                                // Cor do botão de avaliar
                                                 fontSize: 16.0,
                                               ),
                                               child: const Text(
@@ -321,7 +302,6 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
                                                   .outlinedButtonStyle(
                                                 backgroundColor:
                                                     const Color(0xFFFF862D),
-                                                // Cor do botão de ver avaliações
                                                 fontSize: 16.0,
                                               ),
                                               child: const Text(

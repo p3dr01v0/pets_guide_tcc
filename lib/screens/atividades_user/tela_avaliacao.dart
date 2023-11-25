@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_1/screens/atividades_user/ver_avaliacoes.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
+import 'package:flutter_application_1/style/style.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:logger/logger.dart';
 
@@ -174,9 +175,8 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
           key: _formKey,
           child: Column(
             children: <Widget>[
-              Text(
-                  '''${widget.agendamentoId}
-              ${widget.estabelecimentoId}'''),
+              /*Text('''${widget.agendamentoId}
+              ${widget.estabelecimentoId}'''),*/
               const SizedBox(height: 35),
               RatingBar(
                 initialRating: 3, // Classificação inicial
@@ -198,17 +198,28 @@ class TelaAvaliacaoState extends State<TelaAvaliacao> {
                 },
               ),
               const SizedBox(height: 25),
-              TextFormField(
-                minLines: 3,
-                maxLines: 9,
-                controller: _conteudoController,
-                decoration: const InputDecoration(labelText: 'Comentários'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  controller: _conteudoController,
+                  decoration: caixaTxt("Comentário"),
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return "Preencha o campo de comentário";
+                    }
+                    return null;
+                  },
+                ),
               ),
               FilledButton(
-                  style: const ButtonStyle(
-                      fixedSize: MaterialStatePropertyAll(Size(112, 18))),
-                  onPressed: _submitAvaliacao,
-                  child: const Text('Enviar'))
+                style: ButtonStyle(
+                  fixedSize: MaterialStateProperty.all(const Size(112, 18)),
+                  backgroundColor:
+                      MaterialStateProperty.all(const Color(0xFF10428B)),
+                ),
+                onPressed: _submitAvaliacao,
+                child: const Text('Enviar'),
+              )
             ],
           ),
         ),
