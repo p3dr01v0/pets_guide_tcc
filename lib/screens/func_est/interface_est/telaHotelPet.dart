@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, unnecessary_cast
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_serv_est.dart';
 import 'package:flutter_application_1/screens/func_est/agendas/tela_agenda.dart';
@@ -37,39 +39,46 @@ class _TelaHotelPetState extends State<TelaHotelPet> {
   }
 
   Future<void> _fetchProviders(String uid) async {
-    final estabelecimentoCollection = _firestore
-        .collection('estabelecimentos')
-        .where('servico', isEqualTo: true);
+    final estabelecimentoCollection =
+        _firestore.collection('estabelecimentos').where('UID', isEqualTo: uid);
 
-    estabelecimentoCollection.get().then((QuerySnapshot querySnapshot) {
-      if (querySnapshot.docs.isNotEmpty) {
-        for (QueryDocumentSnapshot document in querySnapshot.docs) {
-          final hotelPetReference = document.reference
-              .collection('hotelPet')
-              .where('nomeServico', isNull: false);
-          hotelPetReference.get().then((QuerySnapshot petHotelSnapshot) {
-            if (petHotelSnapshot.docs.isNotEmpty) {
-              // A subcoleção "info" existe neste documento de "estabelecimento"
-              setState(() {
-                _providers = petHotelSnapshot.docs
-                    .map((doc) => doc.data() as Map<String, dynamic>)
-                    .toList();
-              });
-              print('A subcoleção "info" existe neste documento.');
-            } else {
-              // A subcoleção "info" não existe neste documento de "estabelecimento"
-              print('A subcoleção "info" não existe neste documento.');
-            }
-          }).catchError((error) {
-            print('Erro ao consultar a subcoleção "info": $error');
-          });
+    try {
+      final estabelecimentoSnapshot = await estabelecimentoCollection.get();
+
+      if (estabelecimentoSnapshot.docs.isNotEmpty) {
+        final document = estabelecimentoSnapshot.docs.first;
+
+        final hotelPetReference = document.reference.collection('hotelPet');
+
+        try {
+          final petHotelSnapshot = await hotelPetReference.get();
+
+          if (petHotelSnapshot.docs.isNotEmpty) {
+            setState(() {
+              _providers = petHotelSnapshot.docs
+                  .where((doc) => doc.data().containsKey('nomeServico'))
+                  .map((doc) => doc.data() as Map<String, dynamic>)
+                  .toList();
+            });
+            print('A subcoleção "hotelPet" existe neste documento.');
+          } else {
+            setState(() {
+              _providers = [];
+            });
+            print('A subcoleção "hotelPet" está vazia.');
+          }
+        } catch (error) {
+          print('Erro ao consultar a subcoleção "hotelPet": $error');
         }
       } else {
-        print('A coleção "estabelecimento" está vazia ou não existe.');
+        setState(() {
+          _providers = [];
+        });
+        print('O usuário logado não possui estabelecimentos.');
       }
-    }).catchError((error) {
-      print('Erro ao consultar a coleção "estabelecimento": $error');
-    });
+    } catch (error) {
+      print('Erro ao consultar a coleção "estabelecimentos": $error');
+    }
   }
 
   @override

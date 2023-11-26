@@ -118,14 +118,17 @@ class _TelaHorariosState extends State<TelaHorarios> {
                       color: Color.fromARGB(255, 255, 149, 0)),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30)),
-                  fixedSize: const Size(210, 30),
+                  fixedSize: const Size(230, 30),
                 ),
                 onPressed: _showStartTimePicker,
-                child: const Text(
-                  'Selecionar Horario inicial',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 255, 149, 0)),
+                child: Container(
+                  alignment: Alignment.center,
+                  child: const Text(
+                    'Selecionar Horario inicial',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 255, 149, 0)),
+                  ),
                 )),
             const SizedBox(
               height: 20,
@@ -139,12 +142,15 @@ class _TelaHorariosState extends State<TelaHorarios> {
                         color: Color.fromARGB(255, 255, 149, 0)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30)),
-                    fixedSize: const Size(210, 30)),
+                    fixedSize: const Size(230, 30)),
                 onPressed: _showEndTimePicker,
-                child: const Text('Selecionar Horario final',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 255, 149, 0)))),
+                child: Container(
+                  alignment: Alignment.center,
+                  child: const Text('Selecionar Horario final',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 255, 149, 0))),
+                )),
             const SizedBox(
               height: 15,
             ),

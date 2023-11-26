@@ -145,7 +145,7 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
                                     const Text(
                                       'Funcionamento:',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
@@ -170,7 +170,7 @@ class _TelaFinalizarAgendamentoState extends State<TelaFinalizarAgendamento> {
                                     const Text(
                                       'Horários:',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
