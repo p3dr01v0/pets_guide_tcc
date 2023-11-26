@@ -147,7 +147,7 @@ class _TelaBanhoETosaState extends State<TelaBanhoETosa> {
                                 Text('Preço ${_providers[index]['preco']}'),
                               ],
                             ),
-                            trailing: const Icon(Icons.more_vert),
+                            trailing: const Icon(Icons.edit),
                             isThreeLine: true,
                           ),
                         );

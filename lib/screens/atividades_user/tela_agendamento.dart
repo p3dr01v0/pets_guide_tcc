@@ -121,7 +121,7 @@ class _TelaAgendamento extends State<TelaAgendamento> {
       backgroundColor:
           const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        title: const Text('Tela Realizar Agendamento'),
+        title: const Text('Realizar Agendamento'),
         backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(

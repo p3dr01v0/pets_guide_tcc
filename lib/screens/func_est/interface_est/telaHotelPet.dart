@@ -139,7 +139,7 @@ class _TelaHotelPetState extends State<TelaHotelPet> {
                                 Text('Diária ${_providers[index]['preco']}'),
                               ],
                             ),
-                            trailing: const Icon(Icons.more_vert),
+                            trailing: const Icon(Icons.edit),
                             isThreeLine: true,
                           ),
                         );

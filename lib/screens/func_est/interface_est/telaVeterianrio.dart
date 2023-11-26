@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/func_est/atividade_est/add_serv_est.dart';
 import 'package:flutter_application_1/screens/func_est/agendas/tela_agenda.dart';
@@ -147,7 +149,7 @@ class _TelaVeterinarioState extends State<TelaVeterinario> {
                                 Text('Preço ${_providers[index]['preco']}'),
                               ],
                             ),
-                            trailing: const Icon(Icons.more_vert),
+                            trailing: const Icon(Icons.edit),
                             isThreeLine: true,
                           ),
                         );

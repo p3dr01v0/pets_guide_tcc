@@ -38,8 +38,8 @@ class _ValidarCriacaoState extends State<ValidarCriacao> {
           final estabelecimentoDoc = estabelecimentoQuerySnapshot.docs.first;
           final estabelecimentoID = estabelecimentoDoc.id;
 
-          final informacoesCollection = _firestore
-              .collection('estabelecimentos/$estabelecimentoID/informacoes');
+          final informacoesCollection =
+              _firestore.collection('estabelecimentos/$estabelecimentoID/info');
 
           final localizacaoCollection = _firestore
               .collection('estabelecimentos/$estabelecimentoID/localizacao');

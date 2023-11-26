@@ -274,7 +274,9 @@ class _perfilUserState extends State<perfilUser> {
                               style: const TextStyle(
                                   fontSize: 16, color: Colors.black),
                               children: [
-                                const TextSpan(text: 'Email: '),
+                                const TextSpan(
+                                    text: 'Email: ',
+                                    style: TextStyle(fontSize: 16)),
                                 TextSpan(
                                   text: email ?? '',
                                   style: const TextStyle(

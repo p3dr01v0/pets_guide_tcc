@@ -72,7 +72,7 @@ class autenticacaoServico {
           await _firebaseAuth.createUserWithEmailAndPassword(
               email: emailEstabelecimento, password: senhaEstabelecimento);
 
-      await userCredential.user!.sendEmailVerification();
+      //await userCredential.user!.sendEmailVerification();
 
       userCredential.user!.updateDisplayName(nomeEstabelecimento);
 
@@ -99,7 +99,6 @@ class autenticacaoServico {
             "approval": false
           };
 
-// Add a new document with a generated ID with image
           db
               .collection("estabelecimentos")
               .doc(UID)
@@ -146,10 +145,10 @@ class autenticacaoServico {
 
       if (userCredential.user != null) {
         // verifica se o email foi validado
-        if (!userCredential.user!.emailVerified) {
-          // Se o email não estiver verificado, retorne uma mensagem de erro
-          return 'Por favor, verifique seu email antes de fazer login.';
-        }
+        //if (!userCredential.user!.emailVerified) {
+        // Se o email não estiver verificado, retorne uma mensagem de erro
+        //return 'Por favor, verifique seu email antes de fazer login.';
+        //}
 
         return null;
       } else {

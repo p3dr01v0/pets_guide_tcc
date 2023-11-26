@@ -8,6 +8,7 @@ import 'package:flutter_application_1/screens/atividades_user/tela_hist_user.dar
 import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
 import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
+import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
 import 'package:flutter_application_1/screens/pesquisa/pesquisa.dart';
 import 'package:flutter_application_1/screens/pets/add_pet.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -114,6 +115,60 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
       setState(() {
         _user = user;
       });
+    }
+  }
+
+  List<Map<String, dynamic>> _providers = [];
+
+  Future<void> _fetchProviders(String uid) async {
+    _providers.clear();
+
+    try {
+      final estabelecimentoCollection = _firestore
+          .collection('estabelecimentos')
+          .where('servico', isEqualTo: true);
+
+      QuerySnapshot estabelecimentoSnapshot =
+          await estabelecimentoCollection.get();
+
+      for (QueryDocumentSnapshot document in estabelecimentoSnapshot.docs) {
+        final infoReference = document.reference
+            .collection('info')
+            .where("cidade", isEqualTo: cidadeSelecionada);
+
+        QuerySnapshot infoQuerySnapshot = await infoReference.get();
+
+        if (infoQuerySnapshot.docs.isNotEmpty) {
+          setState(() {
+            _providers.addAll(infoQuerySnapshot.docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+
+              final nome = data['nome'] as String? ?? 'Nome Indisponível';
+              final servicosConcluidos =
+                  data['servicosConcluidos'] as int? ?? 0;
+              final notaMedia = data['notaMedia'] as num? ?? 0.0;
+              final ramoPrincipal = data['ramoPrincipal'] as String?;
+              imageEstab = data['imageEstabelecimento'] as String? ?? '';
+
+              print('Image URL: $imageEstab');
+              return {
+                'UID': document.id,
+                'nome': nome,
+                'servicosConcluidos': servicosConcluidos,
+                'notaMedia': notaMedia,
+                'ramoPrincipal': ramoPrincipal,
+                'imageEstab': imageEstab,
+              };
+            }).toList());
+          });
+          print('A subcoleção "info" existe neste documento.');
+        } else {
+          _providers.clear();
+          print('A subcoleção "info" não existe neste documento.');
+        }
+      }
+    } catch (error) {
+      print('Erro ao consultar estabelecimentos: $error');
     }
   }
 
@@ -235,118 +290,137 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                 itemCount: favoritos.length,
                 itemBuilder: (context, index) {
                   final num notaMedia = favoritos[index]['notaMedia'];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    elevation: 5.0,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 8.0,
-                      horizontal: 16.0,
-                    ),
-                    child: ListTile(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                '${favoritos[index]['nome'] ?? ''}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(width: 8.0),
-                            ],
+                  return InkWell(
+                    onTap: () {
+                      final estabelecimentoId = favoritos[index]['UID'];
+                      if (estabelecimentoId != null &&
+                          estabelecimentoId.isNotEmpty) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TelaEstabelecimento(
+                                estabelecimentoId: estabelecimentoId),
                           ),
-                          StreamBuilder<Map<String, dynamic>>(
-                            stream: _isFavoriteStream(favoritos[index]['UID']),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text(
-                                    'Erro ao verificar favorito: ${snapshot.error}');
-                              } else {
-                                bool isFavorite =
-                                    snapshot.data?['isFavorite'] ?? false;
-                                bool isChanging =
-                                    snapshot.data?['isChanging'] ?? false;
-
-                                return IconButton(
-                                  onPressed: () {
-                                    _selecionarFavoritos(
-                                        favoritos[index]['UID']);
-                                  },
-                                  icon: Icon(
-                                    isFavorite
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: isChanging
-                                        ? Colors.grey
-                                        : (isFavorite
-                                            ? Colors.orange
-                                            : Colors.grey),
+                        );
+                      } else {
+                        print(
+                            'ID do estabelecimento inválido: $estabelecimentoId');
+                      }
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      elevation: 5.0,
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 16.0,
+                      ),
+                      child: ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '${favoritos[index]['nome'] ?? ''}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              const Text('serv. principal:'),
-                              const SizedBox(
-                                width: 8,
-                              ),
-                              _getIconForRamo(
-                                  favoritos[index]['ramoPrincipal']),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                  'serv. concluídos: ${favoritos[index]['servicosConcluidos']}'),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              RatingBarIndicator(
-                                itemSize: 15,
-                                rating: notaMedia.toDouble(),
-                                itemBuilder: (context, index) => const Icon(
-                                  Icons.star_rounded,
-                                  color: Colors.amber,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      leading: SizedBox(
-                        width: 50.0,
-                        height: 50.0,
-                        child: favoritos[index]['imageEstab'] != null
-                            ? ClipOval(
-                                child: Image.network(
-                                  favoritos[index]['imageEstab'],
-                                  alignment: Alignment.center,
-                                  width: 72.0,
-                                  height: 72.0,
-                                  fit: BoxFit.cover,
+                                const SizedBox(width: 8.0),
+                              ],
+                            ),
+                            StreamBuilder<Map<String, dynamic>>(
+                              stream:
+                                  _isFavoriteStream(favoritos[index]['UID']),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text(
+                                      'Erro ao verificar favorito: ${snapshot.error}');
+                                } else {
+                                  bool isFavorite =
+                                      snapshot.data?['isFavorite'] ?? false;
+                                  bool isChanging =
+                                      snapshot.data?['isChanging'] ?? false;
+
+                                  return IconButton(
+                                    onPressed: () {
+                                      _selecionarFavoritos(
+                                          favoritos[index]['UID']);
+                                    },
+                                    icon: Icon(
+                                      isFavorite
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: isChanging
+                                          ? Colors.grey
+                                          : (isFavorite
+                                              ? Colors.orange
+                                              : Colors.grey),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Text('serv. principal:'),
+                                const SizedBox(
+                                  width: 8,
                                 ),
-                              )
-                            : const CircleAvatar(
-                                radius: 40,
-                                backgroundImage:
-                                    AssetImage('imagens/estabelecimento.png'),
-                              ),
+                                _getIconForRamo(
+                                    favoritos[index]['ramoPrincipal']),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                    'serv. concluídos: ${favoritos[index]['servicosConcluidos']}'),
+                                const SizedBox(
+                                  width: 16,
+                                ),
+                                RatingBarIndicator(
+                                  itemSize: 15,
+                                  rating: notaMedia.toDouble(),
+                                  itemBuilder: (context, index) => const Icon(
+                                    Icons.star_rounded,
+                                    color: Colors.amber,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        leading: SizedBox(
+                          width: 50.0,
+                          height: 50.0,
+                          child: favoritos[index]['imageEstab'] != null
+                              ? ClipOval(
+                                  child: Image.network(
+                                    favoritos[index]['imageEstab'],
+                                    alignment: Alignment.center,
+                                    width: 72.0,
+                                    height: 72.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : const CircleAvatar(
+                                  radius: 40,
+                                  backgroundImage:
+                                      AssetImage('imagens/estabelecimento.png'),
+                                ),
+                        ),
+                        isThreeLine: true,
                       ),
-                      isThreeLine: true,
                     ),
                   );
                 },
