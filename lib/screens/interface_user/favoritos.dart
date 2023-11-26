@@ -259,6 +259,40 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
                               const SizedBox(width: 8.0),
                             ],
                           ),
+                          StreamBuilder<Map<String, dynamic>>(
+                            stream: _isFavoriteStream(favoritos[index]['UID']),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return Text(
+                                    'Erro ao verificar favorito: ${snapshot.error}');
+                              } else {
+                                bool isFavorite =
+                                    snapshot.data?['isFavorite'] ?? false;
+                                bool isChanging =
+                                    snapshot.data?['isChanging'] ?? false;
+
+                                return IconButton(
+                                  onPressed: () {
+                                    _selecionarFavoritos(
+                                        favoritos[index]['UID']);
+                                  },
+                                  icon: Icon(
+                                    isFavorite
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: isChanging
+                                        ? Colors.grey
+                                        : (isFavorite
+                                            ? Colors.orange
+                                            : Colors.grey),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                         ],
                       ),
                       subtitle: Column(
@@ -338,7 +372,7 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
           type: BottomNavigationBarType.fixed,
           backgroundColor: const Color.fromARGB(255, 255, 251, 248),
           currentIndex: _currentIndex,
-          selectedItemColor: Color(0xFF10428B), // Remova o 'const' aqui
+          selectedItemColor: const Color(0xFF10428B), // Remova o 'const' aqui
           unselectedItemColor: const Color.fromARGB(255, 3, 22, 50),
           onTap: (index) {
             setState(() {
@@ -390,60 +424,6 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
     );
   }
 
-  List<Map<String, dynamic>> _providers = [];
-
-  Future<void> _fetchProviders(String uid) async {
-    _providers.clear();
-
-    try {
-      final estabelecimentoCollection = _firestore
-          .collection('estabelecimentos')
-          .where('servico', isEqualTo: true);
-
-      QuerySnapshot estabelecimentoSnapshot =
-          await estabelecimentoCollection.get();
-
-      for (QueryDocumentSnapshot document in estabelecimentoSnapshot.docs) {
-        final infoReference = document.reference
-            .collection('info')
-            .where("cidade", isEqualTo: cidadeSelecionada);
-
-        QuerySnapshot infoQuerySnapshot = await infoReference.get();
-
-        if (infoQuerySnapshot.docs.isNotEmpty) {
-          setState(() {
-            _providers.addAll(infoQuerySnapshot.docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
-
-              final nome = data['nome'] as String? ?? 'Nome Indisponível';
-              final servicosConcluidos =
-                  data['servicosConcluidos'] as int? ?? 0;
-              final notaMedia = data['notaMedia'] as num? ?? 0.0;
-              final ramoPrincipal = data['ramoPrincipal'] as String?;
-              imageEstab = data['imageEstabelecimento'] as String? ?? '';
-
-              print('Image URL: $imageEstab');
-              return {
-                'UID': document.id,
-                'nome': nome,
-                'servicosConcluidos': servicosConcluidos,
-                'notaMedia': notaMedia,
-                'ramoPrincipal': ramoPrincipal,
-                'imageEstab': imageEstab,
-              };
-            }).toList());
-          });
-          print('A subcoleção "info" existe neste documento. uid: $uid');
-        } else {
-          _providers.clear();
-          print('A subcoleção "info" não existe neste documento.');
-        }
-      }
-    } catch (error) {
-      print('Erro ao consultar estabelecimentos: $error');
-    }
-  }
-
   Future<void> _selecionarFavoritos(String idEstabelecimento) async {
     logger.d(_user!.uid);
     if (idEstabelecimento.isNotEmpty && _user != null) {
@@ -478,21 +458,23 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
     }
   }
 
-  Stream<bool> _isFavoriteStream(String estabelecimentoId) {
+  Stream<Map<String, dynamic>> _isFavoriteStream(String estabelecimentoId) {
     if (_user == null) {
-      return Stream.value(
-          false); // Se o usuário não estiver autenticado, o estabelecimento não é favorito
+      return Stream.value({'isFavorite': false, 'isChanging': false});
     }
 
     final String uid = _user!.uid;
 
-    Stream<QuerySnapshot> querySnapshots = _firestore
+    return _firestore
         .collection('user/$uid/favoritos')
-        .where("estabelecimento", isEqualTo: estabelecimentoId)
-        .snapshots();
-
-    return querySnapshots.map((QuerySnapshot snapshot) {
-      return snapshot.docs.isNotEmpty;
+        .where(
+          "estabelecimento",
+          isEqualTo: estabelecimentoId,
+        )
+        .snapshots()
+        .map((QuerySnapshot snapshot) {
+      bool isFavorite = snapshot.docs.isNotEmpty;
+      return {'isFavorite': isFavorite, 'isChanging': false};
     });
   }
 
@@ -511,21 +493,21 @@ class _TelaFavoritosState extends State<TelaFavoritos> {
         for (QueryDocumentSnapshot document in favoritosSnapshot.docs) {
           String estabelecimentoId = document['estabelecimento'];
 
-          // Buscar todos os documentos na subcoleção "info" para o estabelecimento
+          // Buscar documentos na subcoleção "info" para o estabelecimento
           QuerySnapshot infoSnapshot = await _firestore
               .collection('estabelecimentos/$estabelecimentoId/info')
               .get();
 
           if (infoSnapshot.docs.isNotEmpty) {
-            // Se existirem documentos na subcoleção "info", assumimos o primeiro
-            DocumentSnapshot firstInfoDoc = infoSnapshot.docs.first;
+            DocumentSnapshot infoDoc = infoSnapshot.docs.first;
 
             Map<String, dynamic> favoritoData = {
-              'nome': firstInfoDoc['nome'] ?? 'Nome Indisponível',
-              'ramoPrincipal': firstInfoDoc['ramoPrincipal'] ?? '',
-              'servicosConcluidos': firstInfoDoc['servicosConcluidos'] ?? 0,
-              'notaMedia': firstInfoDoc['notaMedia'] ?? 0.0,
-              'imageEstab': firstInfoDoc['imageEstabelecimento'] ?? '',
+              'UID': estabelecimentoId,
+              'nome': infoDoc['nome'] ?? 'Nome Indisponível',
+              'ramoPrincipal': infoDoc['ramoPrincipal'] ?? '',
+              'servicosConcluidos': infoDoc['servicosConcluidos'] ?? 0,
+              'notaMedia': infoDoc['notaMedia'] ?? 0.0,
+              'imageEstab': infoDoc['imageEstabelecimento'] ?? '',
             };
 
             favoritos.add(favoritoData);
