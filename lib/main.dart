@@ -79,6 +79,11 @@ class MyApp extends StatelessWidget {
         cardTheme: CardTheme(
           color: Colors.white.withOpacity(1.0),
         ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color.fromARGB(255, 255, 251, 248),
+          selectedItemColor: Color(0xFF10428B),
+          unselectedItemColor: Color.fromARGB(255, 3, 22, 50),
+        ),
       ),
     );
   }

@@ -517,26 +517,50 @@ class _homeUserState extends State<homeUser> {
           type: BottomNavigationBarType.fixed,
           backgroundColor: const Color.fromARGB(255, 255, 251, 248),
           currentIndex: _currentIndex,
-          unselectedItemColor: const Color.fromARGB(
-              255, 3, 22, 50), // Cor dos itens não selecionados
-          selectedItemColor: const Color(
-              0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
-          onTap: navegar,
-          items: const [
+          selectedItemColor: Color(0xFF10428B), // Remova o 'const' aqui
+          unselectedItemColor: const Color.fromARGB(255, 3, 22, 50),
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+            navegar(index);
+            print("valor do navegar $index");
+          },
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: Icon(
+                Icons.home,
+                color: _currentIndex == 0
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search),
+              icon: Icon(
+                Icons.search,
+                color: _currentIndex == 1
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Pesquisa',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
+              icon: Icon(
+                Icons.favorite,
+                color: _currentIndex == 2
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Favoritos',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
+              icon: Icon(
+                Icons.person,
+                color: _currentIndex == 3
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Perfil',
             ),
           ],

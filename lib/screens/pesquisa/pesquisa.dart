@@ -42,7 +42,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
   String? telefone;
   String? imageUser;
 
-  int _currentIndex = 0;
+  int _currentIndex = 1;
 
   @override
   void initState() {
@@ -612,22 +612,48 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
               255, 3, 22, 50), // Cor dos itens não selecionados
           selectedItemColor: const Color(
               0xFF10428B), // Cor do item selecionado. azul mais claro Color.fromARGB(255, 44, 104, 255)
-          onTap: navegar,
-          items: const [
+          onTap: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+            navegar(index);
+            print("valor do navegar $index");
+          },
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: Icon(
+                Icons.home,
+                color: _currentIndex == 0
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Home',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search),
+              icon: Icon(
+                Icons.search,
+                color: _currentIndex == 1
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Pesquisa',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
+              icon: Icon(
+                Icons.favorite,
+                color: _currentIndex == 2
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Favoritos',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
+              icon: Icon(
+                Icons.person,
+                color: _currentIndex == 3
+                    ? const Color(0xFF10428B)
+                    : const Color.fromARGB(255, 3, 22, 50),
+              ),
               label: 'Perfil',
             ),
           ],
