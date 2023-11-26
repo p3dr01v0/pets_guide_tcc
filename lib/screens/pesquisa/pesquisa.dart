@@ -11,6 +11,7 @@ import 'package:flutter_application_1/screens/cad_log/cad_log_user.dart';
 import 'package:flutter_application_1/screens/interface_user/favoritos.dart';
 import 'package:flutter_application_1/screens/interface_user/home.dart';
 import 'package:flutter_application_1/screens/interface_user/perfil_user.dart';
+import 'package:flutter_application_1/screens/interface_user/tela_estabelecimento.dart';
 import 'package:flutter_application_1/screens/pets/add_pet.dart';
 import 'package:flutter_application_1/servicos/auth_svc.dart';
 import 'package:flutter_application_1/style/card_pesquisa.dart';
@@ -194,6 +195,18 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
       ),
       elevation: 5,
       child: ListTile(
+        onTap: () {
+          // Adicione aqui a navegação ou ação desejada quando o card for tocado
+          print('Provedor ${provider['UID']} tocado!');
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TelaEstabelecimento(
+                estabelecimentoId: provider['UID'],
+              ),
+            ),
+          );
+        },
         leading: Container(
           width: 50,
           height: 50,
@@ -343,6 +356,23 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
     });
   }
 
+  Future<List<String>> getEstabelecimentoUIDs() async {
+    List<String> estabelecimentoUIDs = [];
+
+    try {
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('estabelecimentos').get();
+
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        estabelecimentoUIDs.add(doc.id);
+      }
+    } catch (e) {
+      print('Erro ao recuperar os UIDs dos estabelecimentos: $e');
+    }
+
+    return estabelecimentoUIDs;
+  }
+
   Widget cardServico(Map<String, dynamic> servico) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -350,6 +380,28 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
       ),
       elevation: 5,
       child: ListTile(
+        onTap: () async {
+          // Recupere a referência do estabelecimento associado ao serviço
+          DocumentReference? estabelecimentoRef = servico['estabelecimentoRef'];
+
+          if (estabelecimentoRef != null) {
+            // Obtenha o ID do documento do estabelecimento a partir da referência
+            String estabelecimentoUID = estabelecimentoRef.id;
+
+            print('Estabelecimento UID: $estabelecimentoUID');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TelaEstabelecimento(
+                  estabelecimentoId: estabelecimentoUID,
+                ),
+              ),
+            );
+          } else {
+            print(
+                'Referência do estabelecimento não disponível para este serviço.');
+          }
+        },
         leading: Container(
           width: 50,
           height: 50,
@@ -363,7 +415,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
             Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
             Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
             Text(
-                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+                "Estabelecimento: ${servico['nomeEstabelecimento'] ?? 'Não disponível'}"),
           ],
         ),
       ),
@@ -377,6 +429,24 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
       ),
       elevation: 5,
       child: ListTile(
+        onTap: () async {
+          // Recupere o UID do estabelecimento associado ao serviço
+          String? estabelecimentoUID = servico['estabelecimentoUID'];
+
+          if (estabelecimentoUID != null) {
+            print('Estabelecimento UID: $estabelecimentoUID');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TelaEstabelecimento(
+                  estabelecimentoId: estabelecimentoUID,
+                ),
+              ),
+            );
+          } else {
+            print('UID do estabelecimento não disponível para este serviço.');
+          }
+        },
         leading: Container(
           width: 50,
           height: 50,
@@ -390,7 +460,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
             Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
             Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
             Text(
-                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+                "Estabelecimento: ${servico['nomeEstabelecimento'] ?? 'Não disponível'}"),
           ],
         ),
       ),
@@ -404,6 +474,24 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
       ),
       elevation: 5,
       child: ListTile(
+        onTap: () async {
+          // Recupere o UID do estabelecimento associado ao serviço
+          String? estabelecimentoUID = servico['estabelecimentoUID'];
+
+          if (estabelecimentoUID != null) {
+            print('Estabelecimento UID: $estabelecimentoUID');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TelaEstabelecimento(
+                  estabelecimentoId: estabelecimentoUID,
+                ),
+              ),
+            );
+          } else {
+            print('UID do estabelecimento não disponível para este serviço.');
+          }
+        },
         leading: Container(
           width: 50,
           height: 50,
@@ -417,7 +505,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
             Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
             Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
             Text(
-                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+                "Estabelecimento: ${servico['nomeEstabelecimento'] ?? 'Não disponível'}"),
           ],
         ),
       ),
@@ -431,6 +519,30 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
       ),
       elevation: 5,
       child: ListTile(
+        onTap: () async {
+          // Recupere o UID do estabelecimento associado ao serviço
+          String? estabelecimentoUID;
+
+          // Verifique se a subcoleção 'estabelecimento' existe no serviço
+          if (servico['estabelecimento'] != null &&
+              servico['estabelecimento']['UID'] != null) {
+            estabelecimentoUID = servico['estabelecimento']['UID'];
+          }
+
+          if (estabelecimentoUID != null) {
+            print('Estabelecimento UID: $estabelecimentoUID');
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TelaEstabelecimento(
+                  estabelecimentoId: estabelecimentoUID!,
+                ),
+              ),
+            );
+          } else {
+            print('UID do estabelecimento não disponível para este serviço.');
+          }
+        },
         leading: Container(
           width: 50,
           height: 50,
@@ -444,7 +556,7 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
             Text("Duração: ${servico['duracao'] ?? 'Não disponível'}"),
             Text("Preço: ${servico['preco'] ?? 'Não disponível'}"),
             Text(
-                "estabelecimento: ${servico['nomeEstabelecimento'] ?? 'estabelecimento'}"),
+                "Estabelecimento: ${servico['nomeEstabelecimento'] ?? 'Não disponível'}"),
           ],
         ),
       ),
@@ -545,51 +657,52 @@ class _pesquisaTesteState extends State<pesquisaTeste> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _buscacontrole,
-                      decoration: const InputDecoration(
-                        labelText: 'Pesquisar',
-                        border: OutlineInputBorder(),
-                      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _buscacontrole,
+                    decoration: const InputDecoration(
+                      labelText: 'Pesquisar',
+                      border: OutlineInputBorder(),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      if (pesquisa == true) {
-                        buscaNome(_buscacontrole.text);
-                      } else {
-                        buscaServico(_buscacontrole.text);
-                      }
-                    },
-                    icon: const Icon(Icons.search),
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    if (pesquisa == true) {
+                      buscaNome(_buscacontrole.text);
+                    } else {
+                      buscaServico(_buscacontrole.text);
+                    }
+                  },
+                  icon: const Icon(Icons.search),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  pesquisa = !pesquisa;
-                });
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                pesquisa = !pesquisa;
+              });
+            },
+            child: Text(
+                (pesquisa) ? "pesquisar serviço" : "pesquisar estabelecimento"),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: resultadoBuscaNome.length,
+              itemBuilder: (context, index) {
+                return resultadoBuscaNome[index];
               },
-              child: Text((pesquisa)
-                  ? "pesquisar serviço"
-                  : "pesquisar estabelecimento"),
             ),
-            ListView(
-              shrinkWrap: true,
-              children: resultadoBuscaNome,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
