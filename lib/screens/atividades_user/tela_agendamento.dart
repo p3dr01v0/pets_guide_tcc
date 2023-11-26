@@ -1,9 +1,7 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_application_1/screens/atividades_user/tela_finalizar_agendamento.dart';
+import 'package:flutter_application_1/screens/atividades_user/tela_finalizar_agendamento_hotel.dart';
 import 'package:logger/logger.dart';
 
 var logger = Logger();
@@ -62,6 +60,7 @@ class _TelaAgendamento extends State<TelaAgendamento> {
 
   void getDiasFuncionamento() async {
     if (_user != null) {
+      // ignore: unused_local_variable
       final String uid = _user!.uid;
 
       final doc = await _firestore
@@ -85,25 +84,35 @@ class _TelaAgendamento extends State<TelaAgendamento> {
       '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
 
 //método paga pegar data
-  void _showDatePicker() {
-    showDatePicker(
+  Future<void> _showDatePicker() async {
+    DateTime currentDate = DateTime.now();
+
+    DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
-      initialDatePickerMode: DatePickerMode.day,
-      selectableDayPredicate: (day) {
-        return diasFuncionamento[day.weekday - 1];
+      initialDate: _dateTime,
+      firstDate: currentDate,
+      lastDate: currentDate.add(const Duration(days: 30)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: const Color(0xFF10428B), // Cor da data selecionada
+            hintColor: const Color(0xFF10428B), // Cor do seletor
+            colorScheme: const ColorScheme.light(primary: Color(0xFF10428B)),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
       },
-    ).then((value) {
-      if (value != null) {
-        setState(() {
-          _dateTime = value; // foi removido o "!" de "value!"
-          showDate = '${_dateTime.day}/${_dateTime.month}/${_dateTime.year}';
-          horario = '';
-        });
-      }
-    });
+    );
+
+    if (pickedDate != null && diasFuncionamento[pickedDate.weekday - 1]) {
+      setState(() {
+        _dateTime = pickedDate;
+        showDate = '${_dateTime.day}/${_dateTime.month}/${_dateTime.year}';
+        horario = '';
+      });
+    }
   }
 
   @override
@@ -125,7 +134,8 @@ class _TelaAgendamento extends State<TelaAgendamento> {
               children: [
                 OutlinedButton(
                   onPressed: _showDatePicker,
-                  child: const Text('Escolher data'),
+                  child: const Text('Escolher data',
+                      style: TextStyle(color: Colors.orange)),
                 ),
                 Text(showDate, style: const TextStyle(fontSize: 16)),
               ],
@@ -197,18 +207,25 @@ class _TelaAgendamento extends State<TelaAgendamento> {
               },
             ),
             FilledButton(
+                style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStateProperty.all(const Color(0xFF10428B)),
+                ),
                 onPressed: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => TelaConcluirAgendamento(
+                          builder: (context) => TelaConcluirAgendamentoHotel(
                               estabelecimentoId: estabelecimentoId,
                               nomeAgenda: nomeAgenda,
                               typeService: typeService,
                               servico: servico,
-                              horario: horario,
-                              data: showDate,
-                              dataOfc: _dateTime,
+                              horarioEntrada: horario,
+                              dataEntrada: showDate,
+                              dataOfcEntrada: _dateTime,
+                              dataSaida: '',
+                              horarioSaida: '',
+                              dataOfcSaida: _dateTime,
                               preco: preco)));
                 },
                 child: const Text('Solicitar Agendamento')),

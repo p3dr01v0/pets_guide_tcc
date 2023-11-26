@@ -198,7 +198,11 @@ class _TelaFinalizarAgendamentoState
                           Container(
                             margin: const EdgeInsets.all(12),
                             padding: const EdgeInsets.all(24),
-                            color: Colors.white,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                  15.0), // Adicionando um raio de 15 pixels
+                            ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -225,7 +229,7 @@ class _TelaFinalizarAgendamentoState
                                       if (widget.dataSaida.isNotEmpty &&
                                           widget.horarioSaida.isNotEmpty)
                                         Text(
-                                            "check_Out: ${widget.dataSaida} às ${widget.horarioSaida}")
+                                            "check-Out: ${widget.dataSaida} às ${widget.horarioSaida}")
                                       else
                                         const SizedBox(
                                           height: 14,
@@ -235,11 +239,11 @@ class _TelaFinalizarAgendamentoState
                                       ),
                                       if (duracao != 0)
                                         Text(
-                                          "valor Final: ${widget.preco} x $duracao",
+                                          "Valor Final: R\$${widget.preco} x $duracao",
                                           style: const TextStyle(fontSize: 18),
                                         )
                                       else
-                                        Text('Valor Final: ${widget.preco}',
+                                        Text('Valor Final: R\$${widget.preco}',
                                             style:
                                                 const TextStyle(fontSize: 18)),
                                       const SizedBox(
@@ -297,11 +301,16 @@ class _TelaFinalizarAgendamentoState
                             ),
                           ),
                           FilledButton(
-                              onPressed: _submitAgendamento,
-                              style: const ButtonStyle(
-                                  fixedSize: MaterialStatePropertyAll(
-                                      Size(250.0, 40.0))),
-                              child: const Text('Concluir'))
+                            onPressed: _submitAgendamento,
+                            style: ButtonStyle(
+                              fixedSize: const MaterialStatePropertyAll(
+                                  Size(250.0, 40.0)),
+                              backgroundColor: MaterialStateProperty.all<Color>(
+                                  const Color(
+                                      0xFF10428B)), // Adicionando a cor azul
+                            ),
+                            child: const Text('Concluir'),
+                          )
                         ],
                       ),
                     )

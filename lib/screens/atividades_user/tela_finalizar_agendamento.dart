@@ -110,7 +110,7 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
         }).then((_) {
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => homeUser()),
+              MaterialPageRoute(builder: (context) => const homeUser()),
               (route) => false);
           Navigator.push(
               context,
@@ -129,7 +129,7 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
         backgroundColor:
             const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
         appBar: AppBar(
-          title: const Text('Finalizar Agendamento'),
+          title: const Text('Finalizar Agendamentos'),
           backgroundColor: const Color(0xFF10428B),
         ),
         body: SingleChildScrollView(
@@ -155,7 +155,9 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
                                 Text(widget.servico),
                                 Text(widget.data),
                                 Text(widget.horario),
-                                Text(widget.preco),
+                                Text(
+                                  "Valor Final: R\$${widget.preco}",
+                                ),
                                 const SizedBox(
                                   height: 15,
                                 )
@@ -206,11 +208,15 @@ class _TelaFinalizarAgendamentoState extends State<TelaConcluirAgendamento> {
                           ),
                           const SizedBox(height: 12),
                           FilledButton(
-                              onPressed: _submitAgendamento,
-                              style: const ButtonStyle(
-                                  fixedSize: MaterialStatePropertyAll(
-                                      Size(250.0, 40.0))),
-                              child: const Text('Concluir'))
+                            onPressed: _submitAgendamento,
+                            style: ButtonStyle(
+                              fixedSize: MaterialStateProperty.all(
+                                  const Size(250.0, 40.0)),
+                              backgroundColor: MaterialStateProperty.all(
+                                  const Color(0xFF10428B)), // Cor azul
+                            ),
+                            child: const Text('Concluir'),
+                          )
                         ],
                       ),
                     )

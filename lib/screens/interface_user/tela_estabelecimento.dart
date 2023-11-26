@@ -29,7 +29,11 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
   String telefone = '';
   String imageEst = '';
   String fundacao = '';
+  String numero = '';
   String rua = '';
+  String bairro = '';
+  String cidade = '';
+  String estado = '';
   bool agenda = false;
   bool avaliacaoDisponivel = false;
 
@@ -71,6 +75,10 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
               imageEst = docInfo['imageEstabelecimento'];
               fundacao = docInfo['fundacao'];
               rua = docLocalizacao['rua'];
+              numero = docLocalizacao['numero'];
+              bairro = docLocalizacao['bairro'];
+              cidade = docLocalizacao['cidade'];
+              estado = docLocalizacao['estado'];
             });
 
             final banhoTosaCollection = _firestore
@@ -180,6 +188,7 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
                       color: cardBackgroundColor,
                       child: Column(
                         children: [
+                          const SizedBox(height: 40),
                           CircleAvatar(
                             radius: 60,
                             backgroundImage: NetworkImage(imageEst),
@@ -197,18 +206,21 @@ class _TelaEstabelecimentoState extends State<TelaEstabelecimento> {
                                 const SizedBox(height: 12),
                                 Text(
                                   telefone,
-                                  style: const TextStyle(fontSize: 24),
+                                  style: const TextStyle(fontSize: 20),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   'Desde: $fundacao',
-                                  style: const TextStyle(fontSize: 24),
+                                  style: const TextStyle(fontSize: 20),
                                 ),
                                 const SizedBox(height: 6),
+                                const Divider(),
                                 Text(
-                                  'Rua: $rua',
-                                  style: const TextStyle(fontSize: 24),
+                                  'Rua $rua, Nº $numero - $bairro, $cidade - $estado',
+                                  style: const TextStyle(fontSize: 18),
+                                  textAlign: TextAlign.center,
                                 ),
+                                const Divider(),
                                 const SizedBox(height: 20),
                                 Visibility(
                                   visible: agenda,

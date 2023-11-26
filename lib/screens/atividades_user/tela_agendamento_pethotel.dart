@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -56,6 +58,8 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
       if (mounted) {
         setState(() {
           _user = user;
+          _dateTime1 = DateTime.now();
+          _dateTime2 = DateTime.now();
         });
         getDiasFuncionamento();
       }
@@ -104,48 +108,68 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
       '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}';
 
 //método paga pegar data
-  void _showDatePickerEntrada() {
-    showDatePicker(
+  Future<void> _showDatePickerEntrada() async {
+    DateTime currentDate = DateTime.now();
+
+    DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 60)),
-      initialDatePickerMode: DatePickerMode.day,
-      selectableDayPredicate: (day) {
-        return diasFuncionamento[day.weekday - 1];
+      initialDate: _dateTime1,
+      firstDate: currentDate,
+      lastDate: currentDate.add(const Duration(days: 30)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: const Color(0xFF10428B), // Cor da data selecionada
+            hintColor: const Color(0xFF10428B), // Cor do seletor
+            colorScheme: const ColorScheme.light(primary: Color(0xFF10428B)),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
       },
-    ).then((value) {
-      if (value != null) {
-        setState(() {
-          _dateTime1 = value;
-          showDateEntrada =
-              '${_dateTime1.day}/${_dateTime1.month}/${_dateTime1.year}';
-          horario1 = '';
-        });
-      }
-    });
+    );
+
+    if (pickedDate != null && diasFuncionamento[pickedDate.weekday - 1]) {
+      setState(() {
+        _dateTime1 = pickedDate;
+        showDateEntrada =
+            '${_dateTime1.day}/${_dateTime1.month}/${_dateTime1.year}';
+        horario1 = '';
+      });
+    }
   }
 
-  void _showDatePickerSaida() {
-    showDatePicker(
+  Future<void> _showDatePickerSaida() async {
+    DateTime currentDate = DateTime.now();
+
+    DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 60)),
-      initialDatePickerMode: DatePickerMode.day,
-      selectableDayPredicate: (day) {
-        return diasFuncionamento[day.weekday - 1];
+      initialDate: _dateTime2,
+      firstDate: currentDate,
+      lastDate: currentDate.add(const Duration(days: 30)),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: const Color(0xFF10428B), // Cor da data selecionada
+            hintColor: const Color(0xFF10428B), // Cor do seletor
+            colorScheme: const ColorScheme.light(primary: Color(0xFF10428B)),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
       },
-    ).then((value) {
-      if (value != null) {
-        setState(() {
-          _dateTime2 = value;
-          showDateSaida =
-              '${_dateTime2.day}/${_dateTime2.month}/${_dateTime2.year}';
-          horario2 = '';
-        });
-      }
-    });
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _dateTime2 = pickedDate;
+        showDateSaida =
+            '${_dateTime2.day}/${_dateTime2.month}/${_dateTime2.year}';
+        horario2 = '';
+      });
+    }
   }
 
   @override
@@ -154,27 +178,34 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
       backgroundColor:
           const Color.fromARGB(255, 255, 243, 236), // cor de fundo da tela
       appBar: AppBar(
-        title: const Text('Tela Realizar Agendamento'),
+        title: const Text('Realizar Agendamento'),
         backgroundColor: const Color(0xFF10428B),
       ),
       body: Center(
         child: Column(
           children: [
-            Text(widget.nomeAgenda),
-            Text(widget.typeService),
-            Text(widget.estabelecimentoId),
-            const SizedBox(height: 50),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 OutlinedButton(
-                  style:
-                      OutlinedButton.styleFrom(fixedSize: const Size(190, 32)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.transparent,
+                    fixedSize: const Size(190, 32), // Cor da borda externa
+                    //side: BorderSide(color: Colors.orange), // Cor da borda
+                  ),
                   onPressed: _showDatePickerEntrada,
-                  child: const Text('Escolher data de entrada'),
+                  child: const Text(
+                    'Escolher data de entrada',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.orange), // Cor do texto
+                  ),
                 ),
-                Text(showDateEntrada, style: const TextStyle(fontSize: 16)),
+                Text(
+                  showDateEntrada,
+                  style: const TextStyle(fontSize: 16),
+                ),
               ],
             ),
             Row(
@@ -182,14 +213,25 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 OutlinedButton(
-                  style:
-                      OutlinedButton.styleFrom(fixedSize: const Size(190, 32)),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.transparent,
+                    fixedSize: const Size(190, 32), // Cor da borda externa
+                    //side: BorderSide(color: Colors.orange), // Cor da borda
+                  ),
                   onPressed: _showDatePickerSaida,
-                  child: const Text('Escolher data de sáida'),
+                  child: const Text(
+                    'Escolher data de saída',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.orange), // Cor do texto
+                  ),
                 ),
-                Text(showDateSaida, style: const TextStyle(fontSize: 16)),
+                Text(
+                  showDateSaida,
+                  style: const TextStyle(fontSize: 16),
+                ),
               ],
             ),
+            const SizedBox(height: 16),
             StreamBuilder<List<String>>(
               // LISTA DE HORARIOS 1
               stream:
@@ -274,6 +316,7 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
                 }
               },
             ),
+            const SizedBox(height: 16),
             StreamBuilder<List<String>>(
               stream: fetchServicesFromFirestore(), // Stream dos serviços
               builder: (context, snapshot) {
@@ -308,6 +351,7 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
                 }
               },
             ),
+            const SizedBox(height: 20),
             FilledButton(
                 onPressed: () {
                   Navigator.push(
@@ -326,6 +370,10 @@ class _TelaAgendamentoPetHotelState extends State<TelaAgendamentoPetHotel> {
                               dataOfcSaida: _dateTime2,
                               preco: preco)));
                 },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(
+                      const Color(0xFF10428B)), // Cor azul
+                ),
                 child: const Text('Solicitar Agendamento')),
             const SizedBox(height: 30),
             Text(
